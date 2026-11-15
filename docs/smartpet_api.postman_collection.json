@@ -1,0 +1,494 @@
+{
+  "info": {
+    "_postman_id": "a7c2b910-4f3b-4c2a-9e1d-100000000001",
+    "name": "SmartPet API",
+    "description": "Colección de endpoints de SmartPet API (prefijo /api/v1).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "usuario_id",
+      "value": "00000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "establecimiento_id",
+      "value": "00000000-0000-0000-0000-000000000002",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoints de autenticación y perfil de usuario (JWT).",
+      "item": [
+        {
+          "name": "Register (Ciudadano)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.access_token) {",
+                  "    pm.collectionVariables.set('access_token', data.access_token);",
+                  "  }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Pérez\",\n  \"email\": \"ana@ejemplo.com\",\n  \"password\": \"MiPassword123\",\n  \"telefono\": \"70012345\",\n  \"fotoUrl\": \"https://ejemplo.com/foto.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registra un nuevo usuario con rol CIUDADANO (cuando no se envía `establecimiento`).\n\n### Atributos del Body\n- `nombre` (string, obligatorio, máx. 100)\n- `apellido` (string, obligatorio, máx. 100)\n- `email` (string/email, obligatorio, único, máx. 150)\n- `password` (string, obligatorio, mín. 8, máx. 72)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n\n### Respuestas\n- `201 Created`: retorna `access_token` y `usuario`\n- `400 Bad Request`: error de validación\n- `409 Conflict`: email ya registrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Register (Encargado + Establecimiento)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.access_token) {",
+                  "    pm.collectionVariables.set('access_token', data.access_token);",
+                  "  }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Gómez\",\n  \"email\": \"carlos@veterinaria.com\",\n  \"password\": \"MiPassword123\",\n  \"telefono\": \"71122334\",\n  \"fotoUrl\": \"https://ejemplo.com/encargado.jpg\",\n  \"establecimiento\": {\n    \"nombre\": \"Veterinaria San Roque\",\n    \"tipo\": \"VETERINARIA\",\n    \"descripcion\": \"Atención médica veterinaria general y emergencias\",\n    \"direccion\": \"Av. Busch #450\",\n    \"latitud\": -17.783327,\n    \"longitud\": -63.182140,\n    \"telefono\": \"33445566\",\n    \"horarioAtencion\": \"Lun-Sab 08:00-20:00\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registra un nuevo usuario con rol ENCARGADO y crea su `establecimiento` dentro de una transacción.\n\n### Atributos del Body\n- `nombre` (string, obligatorio, máx. 100)\n- `apellido` (string, obligatorio, máx. 100)\n- `email` (string/email, obligatorio, único, máx. 150)\n- `password` (string, obligatorio, mín. 8, máx. 72)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n- `establecimiento` (object, **opcional** — si se incluye, registra como ENCARGADO):\n  - `nombre` (string, obligatorio, máx. 150)\n  - `tipo` (enum `VETERINARIA` | `REFUGIO`, obligatorio)\n  - `descripcion` (string, **opcional**)\n  - `direccion` (string, obligatorio, máx. 255)\n  - `latitud` (number, **opcional**, -90 a 90)\n  - `longitud` (number, **opcional**, -180 a 180)\n  - `telefono` (string, obligatorio, máx. 20)\n  - `horarioAtencion` (string, **opcional**, máx. 150)\n\n### Respuestas\n- `201 Created`: retorna `access_token` y `usuario` con `establecimiento`\n- `400 Bad Request`: error de validación\n- `409 Conflict`: email ya registrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.access_token) {",
+                  "    pm.collectionVariables.set('access_token', data.access_token);",
+                  "  }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana@ejemplo.com\",\n  \"password\": \"MiPassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Inicia sesión con email y contraseña para obtener un JWT.\n\n### Atributos del Body\n- `email` (string/email, obligatorio)\n- `password` (string, obligatorio)\n\n### Respuestas\n- `200 OK`: retorna `access_token` y `usuario`\n- `400 Bad Request`: error de validación\n- `401 Unauthorized`: credenciales inválidas o cuenta inactiva"
+          },
+          "response": []
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Obtiene el perfil del usuario autenticado usando el Bearer JWT.\n\n### Headers\n- `Authorization`: `Bearer {{access_token}}` (obligatorio)\n\n### Respuestas\n- `200 OK`: datos públicos del usuario y establecimiento (si aplica)\n- `401 Unauthorized`: token ausente, inválido, expirado o usuario inactivo"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana María\",\n  \"apellido\": \"Pérez\",\n  \"telefono\": \"70099999\",\n  \"fotoUrl\": \"https://ejemplo.com/nueva-foto.jpg\",\n  \"password\": \"NuevoPassword123\",\n  \"establecimiento\": {\n    \"nombre\": \"Veterinaria San Roque\",\n    \"tipo\": \"VETERINARIA\",\n    \"descripcion\": \"Atención médica veterinaria\",\n    \"direccion\": \"Av. Busch #450\",\n    \"latitud\": -17.783327,\n    \"longitud\": -63.182140,\n    \"telefono\": \"33445566\",\n    \"horarioAtencion\": \"Lun-Sab 08:00-20:00\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Actualiza el perfil propio del usuario autenticado (y su `establecimiento` si es ENCARGADO).\n\n### Atributos del Body (todos **opcionales**)\n- `nombre` (string, **opcional**, máx. 100)\n- `apellido` (string, **opcional**, máx. 100)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n- `password` (string, **opcional**, mín. 8, máx. 72)\n- `establecimiento` (object, **opcional**, solo aplica para ENCARGADO)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Roles (Admin)",
+      "description": "Consulta de roles del sistema (Requiere JWT con rol ADMIN).",
+      "item": [
+        {
+          "name": "Listar Roles",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            },
+            "description": "Lista los roles disponibles del sistema (`ADMIN`, `CIUDADANO`, `ENCARGADO`).\n\n### Respuestas\n- `200 OK`: arreglo de roles\n- `401 Unauthorized` / `403 Forbidden`: sin permisos de ADMIN"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuarios (Admin)",
+      "description": "Gestión administrativa de usuarios: ver, editar y desactivar (Requiere JWT con rol ADMIN).",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Lista todos los usuarios registrados con su `rol` y su `establecimiento` (si aplica).\n\n### Respuestas\n- `200 OK`: arreglo de usuarios\n- `401 Unauthorized` / `403 Forbidden`: sin permisos de ADMIN"
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuario_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "{{usuario_id}}"]
+            },
+            "description": "Obtiene el detalle de un usuario por su UUID.\n\n### Respuestas\n- `200 OK`: objeto usuario\n- `400 Bad Request`: UUID inválido\n- `404 Not Found`: usuario no encontrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"María Elena\",\n  \"apellido\": \"López\",\n  \"telefono\": \"70011223\",\n  \"fotoUrl\": \"https://ejemplo.com/nueva.jpg\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuario_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "{{usuario_id}}"]
+            },
+            "description": "Actualiza los datos de un usuario existente.\n\n### Atributos del Body (todos **opcionales**)\n- `nombre` (string, **opcional**, máx. 100)\n- `apellido` (string, **opcional**, máx. 100)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n- `estado` (boolean, **opcional**, `true` | `false`)\n\n### Respuestas\n- `200 OK`: usuario actualizado\n- `404 Not Found`: usuario no encontrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Desactivar Usuario (Baja Lógica)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{usuario_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", "{{usuario_id}}"]
+            },
+            "description": "Realiza la baja lógica del usuario cambiando `estado` a `false`.\n\n### Respuestas\n- `200 OK`: usuario con `estado: false`\n- `404 Not Found`: usuario no encontrado"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Establecimientos (Admin)",
+      "description": "Gestión administrativa de establecimientos: ver, editar y desactivar (Requiere JWT con rol ADMIN).",
+      "item": [
+        {
+          "name": "Listar Establecimientos",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/establecimientos",
+              "host": ["{{baseUrl}}"],
+              "path": ["establecimientos"]
+            },
+            "description": "Lista todos los establecimientos registrados junto con los datos públicos de su usuario encargado.\n\n### Respuestas\n- `200 OK`: arreglo de establecimientos"
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Establecimiento por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/establecimientos/{{establecimiento_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["establecimientos", "{{establecimiento_id}}"]
+            },
+            "description": "Obtiene el detalle de un establecimiento por su UUID.\n\n### Respuestas\n- `200 OK`: objeto establecimiento\n- `400 Bad Request`: UUID inválido\n- `404 Not Found`: establecimiento no encontrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Establecimiento",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Veterinaria San Roque Central\",\n  \"tipo\": \"VETERINARIA\",\n  \"descripcion\": \"Atención 24 horas\",\n  \"direccion\": \"Av. Busch #455\",\n  \"latitud\": -17.783500,\n  \"longitud\": -63.182200,\n  \"telefono\": \"33445577\",\n  \"horarioAtencion\": \"Lun-Dom 24 hrs\",\n  \"estado\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/establecimientos/{{establecimiento_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["establecimientos", "{{establecimiento_id}}"]
+            },
+            "description": "Actualiza los datos de un establecimiento existente.\n\n### Atributos del Body (todos **opcionales**)\n- `nombre` (string, **opcional**, máx. 150)\n- `tipo` (enum `\"VETERINARIA\"` | `\"REFUGIO\"`, **opcional**)\n- `descripcion` (string, **opcional**)\n- `direccion` (string, **opcional**, máx. 255)\n- `latitud` (number, **opcional**, -90 a 90)\n- `longitud` (number, **opcional**, -180 a 180)\n- `telefono` (string, **opcional**, máx. 20)\n- `horarioAtencion` (string, **opcional**, máx. 150)\n- `estado` (boolean, **opcional**, `true` | `false`)\n\n### Respuestas\n- `200 OK`: establecimiento actualizado\n- `404 Not Found`: establecimiento no encontrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Desactivar Establecimiento (Baja Lógica)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/establecimientos/{{establecimiento_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["establecimientos", "{{establecimiento_id}}"]
+            },
+            "description": "Realiza la baja lógica del establecimiento cambiando `estado` a `false`.\n\n### Respuestas\n- `200 OK`: establecimiento con `estado: false`\n- `404 Not Found`: establecimiento no encontrado"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
