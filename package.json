@@ -81,7 +81,7 @@
       "^.+\\.(t|j)s$": "<rootDir>/../test/ts-jest-cjs.cjs"
     },
     "transformIgnorePatterns": [
-      "node_modules[\\\\/](?!@nestjs[\\\\/](jwt|mapped-types|typeorm|passport))"
+      "node_modules[\\\\/](?!@nestjs[\\\\/](jwt|mapped-types|typeorm|passport|config))"
     ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"

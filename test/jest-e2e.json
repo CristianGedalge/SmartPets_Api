@@ -4,6 +4,9 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  }
+    "^.+\\.(t|j)s$": "<rootDir>/ts-jest-cjs.cjs"
+  },
+  "transformIgnorePatterns": [
+    "node_modules[\\\\/](?!@nestjs[\\\\/](jwt|mapped-types|typeorm|passport|config))"
+  ]
 }

@@ -8,7 +8,7 @@ export class InitialAuthSchema1700000000000 implements MigrationInterface {
     await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
 
     await queryRunner.query(`
-      CREATE TABLE "rol" (
+      CREATE TABLE IF NOT EXISTS "rol" (
         "id" SERIAL NOT NULL,
         "nombre" character varying(30) NOT NULL,
         CONSTRAINT "UQ_rol_nombre" UNIQUE ("nombre"),
@@ -23,7 +23,7 @@ export class InitialAuthSchema1700000000000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TABLE "usuario" (
+      CREATE TABLE IF NOT EXISTS "usuario" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "rol_id" integer NOT NULL,
         "nombre" character varying(100) NOT NULL,
@@ -60,11 +60,15 @@ export class InitialAuthSchema1700000000000 implements MigrationInterface {
     );
 
     await queryRunner.query(`
-      CREATE TYPE "public"."establecimiento_tipo_enum" AS ENUM('VETERINARIA', 'REFUGIO')
+      DO $$ BEGIN
+        CREATE TYPE "public"."establecimiento_tipo_enum" AS ENUM('VETERINARIA', 'REFUGIO');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
     `);
 
     await queryRunner.query(`
-      CREATE TABLE "establecimiento" (
+      CREATE TABLE IF NOT EXISTS "establecimiento" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "usuario_id" uuid NOT NULL,
         "nombre" character varying(150) NOT NULL,
@@ -87,9 +91,15 @@ export class InitialAuthSchema1700000000000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "establecimiento"`);
-    await queryRunner.query(`DROP TYPE "public"."establecimiento_tipo_enum"`);
-    await queryRunner.query(`DROP TABLE "usuario"`);
-    await queryRunner.query(`DROP TABLE "rol"`);
+    await queryRunner.query(
+      `DROP TABLE IF EXISTS "veterinaria_refugio" CASCADE`,
+    );
+    await queryRunner.query(`DROP TABLE IF EXISTS "ciudadano" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "establecimiento" CASCADE`);
+    await queryRunner.query(
+      `DROP TYPE IF EXISTS "public"."establecimiento_tipo_enum" CASCADE`,
+    );
+    await queryRunner.query(`DROP TABLE IF EXISTS "usuario" CASCADE`);
+    await queryRunner.query(`DROP TABLE IF EXISTS "rol" CASCADE`);
   }
 }

@@ -25,6 +25,46 @@
       "key": "establecimiento_id",
       "value": "00000000-0000-0000-0000-000000000002",
       "type": "string"
+    },
+    {
+      "key": "especie_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "mascota_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "foto_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alerta_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "avistamiento_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "avistamiento_foto_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "animal_resguardado_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "publicacion_adopcion_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -69,8 +109,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             },
             "description": "Registra un nuevo usuario con rol CIUDADANO (cuando no se envía `establecimiento`).\n\n### Atributos del Body\n- `nombre` (string, obligatorio, máx. 100)\n- `apellido` (string, obligatorio, máx. 100)\n- `email` (string/email, obligatorio, único, máx. 150)\n- `password` (string, obligatorio, mín. 8, máx. 72)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n\n### Respuestas\n- `201 Created`: retorna `access_token` y `usuario`\n- `400 Bad Request`: error de validación\n- `409 Conflict`: email ya registrado"
           },
@@ -113,8 +158,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             },
             "description": "Registra un nuevo usuario con rol ENCARGADO y crea su `establecimiento` dentro de una transacción.\n\n### Atributos del Body\n- `nombre` (string, obligatorio, máx. 100)\n- `apellido` (string, obligatorio, máx. 100)\n- `email` (string/email, obligatorio, único, máx. 150)\n- `password` (string, obligatorio, mín. 8, máx. 72)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n- `establecimiento` (object, **opcional** — si se incluye, registra como ENCARGADO):\n  - `nombre` (string, obligatorio, máx. 150)\n  - `tipo` (enum `VETERINARIA` | `REFUGIO`, obligatorio)\n  - `descripcion` (string, **opcional**)\n  - `direccion` (string, obligatorio, máx. 255)\n  - `latitud` (number, **opcional**, -90 a 90)\n  - `longitud` (number, **opcional**, -180 a 180)\n  - `telefono` (string, obligatorio, máx. 20)\n  - `horarioAtencion` (string, **opcional**, máx. 150)\n\n### Respuestas\n- `201 Created`: retorna `access_token` y `usuario` con `establecimiento`\n- `400 Bad Request`: error de validación\n- `409 Conflict`: email ya registrado"
           },
@@ -157,8 +207,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "description": "Inicia sesión con email y contraseña para obtener un JWT.\n\n### Atributos del Body\n- `email` (string/email, obligatorio)\n- `password` (string, obligatorio)\n\n### Respuestas\n- `200 OK`: retorna `access_token` y `usuario`\n- `400 Bad Request`: error de validación\n- `401 Unauthorized`: credenciales inválidas o cuenta inactiva"
           },
@@ -181,8 +236,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/auth/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "profile"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
             },
             "description": "Obtiene el perfil del usuario autenticado usando el Bearer JWT.\n\n### Headers\n- `Authorization`: `Bearer {{access_token}}` (obligatorio)\n\n### Respuestas\n- `200 OK`: datos públicos del usuario y establecimiento (si aplica)\n- `401 Unauthorized`: token ausente, inválido, expirado o usuario inactivo"
           },
@@ -219,8 +279,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/auth/profile",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "profile"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "profile"
+              ]
             },
             "description": "Actualiza el perfil propio del usuario autenticado (y su `establecimiento` si es ENCARGADO).\n\n### Atributos del Body (todos **opcionales**)\n- `nombre` (string, **opcional**, máx. 100)\n- `apellido` (string, **opcional**, máx. 100)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n- `password` (string, **opcional**, mín. 8, máx. 72)\n- `establecimiento` (object, **opcional**, solo aplica para ENCARGADO)"
           },
@@ -249,8 +314,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/roles",
-              "host": ["{{baseUrl}}"],
-              "path": ["roles"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "roles"
+              ]
             },
             "description": "Lista los roles disponibles del sistema (`ADMIN`, `CIUDADANO`, `ENCARGADO`).\n\n### Respuestas\n- `200 OK`: arreglo de roles\n- `401 Unauthorized` / `403 Forbidden`: sin permisos de ADMIN"
           },
@@ -279,8 +348,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/usuarios",
-              "host": ["{{baseUrl}}"],
-              "path": ["usuarios"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
             },
             "description": "Lista todos los usuarios registrados con su `rol` y su `establecimiento` (si aplica).\n\n### Respuestas\n- `200 OK`: arreglo de usuarios\n- `401 Unauthorized` / `403 Forbidden`: sin permisos de ADMIN"
           },
@@ -303,8 +376,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/usuarios/{{usuario_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["usuarios", "{{usuario_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuario_id}}"
+              ]
             },
             "description": "Obtiene el detalle de un usuario por su UUID.\n\n### Respuestas\n- `200 OK`: objeto usuario\n- `400 Bad Request`: UUID inválido\n- `404 Not Found`: usuario no encontrado"
           },
@@ -341,8 +419,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/usuarios/{{usuario_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["usuarios", "{{usuario_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuario_id}}"
+              ]
             },
             "description": "Actualiza los datos de un usuario existente.\n\n### Atributos del Body (todos **opcionales**)\n- `nombre` (string, **opcional**, máx. 100)\n- `apellido` (string, **opcional**, máx. 100)\n- `telefono` (string, **opcional**, máx. 20)\n- `fotoUrl` (string, **opcional**)\n- `estado` (boolean, **opcional**, `true` | `false`)\n\n### Respuestas\n- `200 OK`: usuario actualizado\n- `404 Not Found`: usuario no encontrado"
           },
@@ -365,8 +448,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/usuarios/{{usuario_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["usuarios", "{{usuario_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{usuario_id}}"
+              ]
             },
             "description": "Realiza la baja lógica del usuario cambiando `estado` a `false`.\n\n### Respuestas\n- `200 OK`: usuario con `estado: false`\n- `404 Not Found`: usuario no encontrado"
           },
@@ -395,8 +483,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/establecimientos",
-              "host": ["{{baseUrl}}"],
-              "path": ["establecimientos"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "establecimientos"
+              ]
             },
             "description": "Lista todos los establecimientos registrados junto con los datos públicos de su usuario encargado.\n\n### Respuestas\n- `200 OK`: arreglo de establecimientos"
           },
@@ -419,8 +511,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/establecimientos/{{establecimiento_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["establecimientos", "{{establecimiento_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "establecimientos",
+                "{{establecimiento_id}}"
+              ]
             },
             "description": "Obtiene el detalle de un establecimiento por su UUID.\n\n### Respuestas\n- `200 OK`: objeto establecimiento\n- `400 Bad Request`: UUID inválido\n- `404 Not Found`: establecimiento no encontrado"
           },
@@ -457,8 +554,13 @@
             },
             "url": {
               "raw": "{{baseUrl}}/establecimientos/{{establecimiento_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["establecimientos", "{{establecimiento_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "establecimientos",
+                "{{establecimiento_id}}"
+              ]
             },
             "description": "Actualiza los datos de un establecimiento existente.\n\n### Atributos del Body (todos **opcionales**)\n- `nombre` (string, **opcional**, máx. 150)\n- `tipo` (enum `\"VETERINARIA\"` | `\"REFUGIO\"`, **opcional**)\n- `descripcion` (string, **opcional**)\n- `direccion` (string, **opcional**, máx. 255)\n- `latitud` (number, **opcional**, -90 a 90)\n- `longitud` (number, **opcional**, -180 a 180)\n- `telefono` (string, **opcional**, máx. 20)\n- `horarioAtencion` (string, **opcional**, máx. 150)\n- `estado` (boolean, **opcional**, `true` | `false`)\n\n### Respuestas\n- `200 OK`: establecimiento actualizado\n- `404 Not Found`: establecimiento no encontrado"
           },
@@ -481,10 +583,1565 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/establecimientos/{{establecimiento_id}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["establecimientos", "{{establecimiento_id}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "establecimientos",
+                "{{establecimiento_id}}"
+              ]
             },
             "description": "Realiza la baja lógica del establecimiento cambiando `estado` a `false`.\n\n### Respuestas\n- `200 OK`: establecimiento con `estado: false`\n- `404 Not Found`: establecimiento no encontrado"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Mascotas y especies",
+      "description": "Propiedad estricta para ADMIN, CIUDADANO y ENCARGADO. Ver docs/mascotas.md.",
+      "item": [
+        {
+          "name": "Listar especies",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/especies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "especies"
+              ]
+            },
+            "description": "JWT requerido. Guarda especie_id para el registro."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) { const species = pm.response.json(); if (species.length) pm.collectionVariables.set('especie_id', species[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registrar mascota con fotos",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "nombre",
+                  "value": "Luna",
+                  "type": "text"
+                },
+                {
+                  "key": "especieId",
+                  "value": "{{especie_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "razaNombre",
+                  "value": "Mestizo",
+                  "type": "text"
+                },
+                {
+                  "key": "sexo",
+                  "value": "HEMBRA",
+                  "type": "text"
+                },
+                {
+                  "key": "color",
+                  "value": "Blanco y negro",
+                  "type": "text"
+                },
+                {
+                  "key": "pesoKg",
+                  "value": "4.25",
+                  "type": "text"
+                },
+                {
+                  "key": "edadAproximadaMeses",
+                  "value": "12",
+                  "type": "text"
+                },
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mascotas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mascotas"
+              ]
+            },
+            "description": "Selecciona 1 a 5 archivos locales en fotos (JPEG/PNG/WebP, maximo 5 MiB por archivo). No fijar Content-Type manualmente."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const pet = pm.response.json();",
+                  "  pm.collectionVariables.set('mascota_id', pet.id);",
+                  "  if (pet.fotos?.length) pm.collectionVariables.set('foto_id', pet.fotos[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mis mascotas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mascotas/mis-mascotas?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mascotas",
+                "mis-mascotas"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar mascota propia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mascotas/{{mascota_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mascotas",
+                "{{mascota_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar datos (sin fotos)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Luna\",\n  \"razaNombre\": \"Mestizo\",\n  \"sexo\": \"HEMBRA\",\n  \"color\": \"Blanco y negro\",\n  \"pesoKg\": 4.5,\n  \"edadAproximadaMeses\": 13\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mascotas/{{mascota_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mascotas",
+                "{{mascota_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Agregar fotos",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mascotas/{{mascota_id}}/fotos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mascotas",
+                "{{mascota_id}}",
+                "fotos"
+              ]
+            },
+            "description": "Solo archivos en fotos. Maximo total 5 por mascota."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const pet = pm.response.json();",
+                  "  pm.collectionVariables.set('mascota_id', pet.id);",
+                  "  if (pet.fotos?.length) pm.collectionVariables.set('foto_id', pet.fotos[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar foto",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mascotas/{{mascota_id}}/fotos/{{foto_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mascotas",
+                "{{mascota_id}}",
+                "fotos",
+                "{{foto_id}}"
+              ]
+            },
+            "description": "Conserva al menos una. Reasigna principal y devuelve limpiezaPendiente si Cloudinary requiere reintentos."
+          }
+        },
+        {
+          "name": "Desactivar mascota",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mascotas/{{mascota_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mascotas",
+                "{{mascota_id}}"
+              ]
+            },
+            "description": "Baja logica. Conserva fotos y oculta la mascota de los endpoints activos."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alertas de extravío",
+      "description": "Ver docs/alertas-extravio.md. Solo una ACTIVA por mascota. ADMIN tambien requiere propiedad. Sin radio, fotos ni propietario en body.",
+      "item": [
+        {
+          "name": "Publicar alerta propia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mascotaId\": \"{{mascota_id}}\",\n  \"descripcion\": \"Cerca de la plaza. Lleva collar azul.\",\n  \"fechaExtravio\": \"2020-01-01T12:00:00-04:00\",\n  \"latitud\": -17.7833,\n  \"longitud\": -63.1821\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alertas-extravio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas-extravio"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('alerta_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar alertas activas (publico)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alertas-extravio?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas-extravio"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mis alertas e historial",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alertas-extravio/mis-alertas?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas-extravio",
+                "mis-alertas"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar detalle (JWT propio o No Auth publico)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alertas-extravio/{{alerta_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas-extravio",
+                "{{alerta_id}}"
+              ]
+            },
+            "description": "Con JWT del propietario incluye historial. Sin Authorization solo ACTIVA con mascota activa. Token enviado pero invalido responde 401."
+          }
+        },
+        {
+          "name": "Actualizar alerta activa",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Ultima vez vista junto al parque.\",\n  \"fechaExtravio\": \"2020-01-01T13:30:00-04:00\",\n  \"latitud\": -17.784,\n  \"longitud\": -63.183\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alertas-extravio/{{alerta_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas-extravio",
+                "{{alerta_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resolver alerta propia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alertas-extravio/{{alerta_id}}/resolver",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas-extravio",
+                "{{alerta_id}}",
+                "resolver"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancelar alerta propia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alertas-extravio/{{alerta_id}}/cancelar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alertas-extravio",
+                "{{alerta_id}}",
+                "cancelar"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Avistamientos",
+      "description": "Sin IA. Selecciona entre 1 y 5 fotos JPEG/PNG/WebP de hasta 5 MiB. Solo el autor modifica reportes activos. Cierre/cancelacion conservan historial propio. Contrato en specs/avistamientos/design.md.",
+      "item": [
+        {
+          "name": "Publicar avistamiento",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "especieId",
+                  "value": "{{especie_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "descripcion",
+                  "value": "Perro con collar rojo",
+                  "type": "text"
+                },
+                {
+                  "key": "direccion",
+                  "value": "Plaza central",
+                  "type": "text"
+                },
+                {
+                  "key": "fechaAvistamiento",
+                  "value": "2020-01-01T12:00:00-04:00",
+                  "type": "text"
+                },
+                {
+                  "key": "latitud",
+                  "value": "-17.7833",
+                  "type": "text"
+                },
+                {
+                  "key": "longitud",
+                  "value": "-63.1821",
+                  "type": "text"
+                },
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('avistamiento_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comunidad",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mis avistamientos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos/mis-avistamientos?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos",
+                "mis-avistamientos"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Detalle",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos/{{avistamiento_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos",
+                "{{avistamiento_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Editar datos",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos/{{avistamiento_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos",
+                "{{avistamiento_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Visto cerca de la entrada de la plaza\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cerrar reporte",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos/{{avistamiento_id}}/cerrar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos",
+                "{{avistamiento_id}}",
+                "cerrar"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar reporte",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos/{{avistamiento_id}}/cancelar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos",
+                "{{avistamiento_id}}",
+                "cancelar"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar fotos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos/{{avistamiento_id}}/fotos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos",
+                "{{avistamiento_id}}",
+                "fotos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar foto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/avistamientos/{{avistamiento_id}}/fotos/{{avistamiento_foto_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "avistamientos",
+                "{{avistamiento_id}}",
+                "fotos",
+                "{{avistamiento_foto_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Animales resguardados",
+      "description": "Solo ENCARGADO con establecimiento activo. El servidor deduce establecimiento/propietario; mascota y asociacion se crean juntas.",
+      "item": [
+        {
+          "name": "Registrar animal resguardado",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animales-resguardados",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales-resguardados"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "nombre",
+                  "value": "Luna",
+                  "type": "text"
+                },
+                {
+                  "key": "especieId",
+                  "value": "{{especie_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('animal_resguardado_id',pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar animales propios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animales-resguardados?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales-resguardados"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Detalle propio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animales-resguardados/{{animal_resguardado_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales-resguardados",
+                "{{animal_resguardado_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Editar ficha",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animales-resguardados/{{animal_resguardado_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales-resguardados",
+                "{{animal_resguardado_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Luna\",\n  \"color\": \"Blanco y cafe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Agregar fotos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animales-resguardados/{{animal_resguardado_id}}/fotos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales-resguardados",
+                "{{animal_resguardado_id}}",
+                "fotos"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar foto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animales-resguardados/{{animal_resguardado_id}}/fotos/{{foto_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animales-resguardados",
+                "{{animal_resguardado_id}}",
+                "fotos",
+                "{{foto_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Adopciones",
+      "description": "Catalogo publico y gestion propia ENCARGADO. Sin solicitudes, adoptantes, chat ni IA.",
+      "item": [
+        {
+          "name": "Publicar para adopcion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"animalResguardadoId\": \"{{animal_resguardado_id}}\",\n  \"descripcion\": \"Busca un hogar responsable\",\n  \"requisitos\": \"Compromiso de cuidado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('publicacion_adopcion_id',pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Catalogo publico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mis publicaciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones/mis-publicaciones?limit=10&offset=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones",
+                "mis-publicaciones"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Detalle publico disponible",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones/{{publicacion_adopcion_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones",
+                "{{publicacion_adopcion_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Editar publicacion",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones/{{publicacion_adopcion_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones",
+                "{{publicacion_adopcion_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Lista para encontrar un hogar\",\n  \"requisitos\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Volver a publicar",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones/{{publicacion_adopcion_id}}/publicar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones",
+                "{{publicacion_adopcion_id}}",
+                "publicar"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Retirar publicacion",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones/{{publicacion_adopcion_id}}/retirar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones",
+                "{{publicacion_adopcion_id}}",
+                "retirar"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar adopcion",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/adopciones/{{publicacion_adopcion_id}}/adoptar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adopciones",
+                "{{publicacion_adopcion_id}}",
+                "adoptar"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           },
           "response": []
         }

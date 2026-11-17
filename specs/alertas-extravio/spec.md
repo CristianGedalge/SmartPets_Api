@@ -1,0 +1,11 @@
+# Alertas de extravío
+
+Crear tabla alerta_extravio con los atributos del requerimiento adjunto y estados ACTIVA, RESUELTA, CANCELADA, OCULTA. Sin usuario_id, fotos duplicadas, radio_km, PostGIS, IA, avistamientos ni moderación. La propiedad se obtiene a través de mascota.usuario_id. Mascota admite historial, pero solo una alerta ACTIVA por vez, con índice único parcial.
+
+Crear exige JWT, mascota activa y propia y ausencia de otra alerta activa. Asignar estado en servidor. Los tres roles gestionan solo sus propias alertas; ADMIN no tiene privilegio de propietario. Describir hasta 2000 caracteres; fecha ISO 8601 con zona horaria y no futura; latitud y longitud numéricas en sus rangos geográficos, con máximo ocho decimales. DTO JSON camelCase como el resto del proyecto; snake_case solo en SQL. No aceptar propietario, estado, fechaResolucion, auditoría ni mascotaId en PATCH.
+
+GET público lista únicamente ACTIVA con mascota activa e incluye datos básicos de mascota, especie y foto principal, sin información privada del dueño ni claves de almacenamiento. Mis alertas exige JWT y devuelve todas las alertas del dueño, incluyendo historial y mascotas desactivadas. Detalle permite acceso público a ACTIVA con mascota activa; opcionalmente autentica JWT para que el dueño consulte su propio historial. Un token enviado pero inválido responde 401. El estado OCULTA nunca aparece públicamente; no existe operación para asignarlo.
+
+Actualizar, resolver y cancelar exigen propiedad y estado ACTIVA. No hay reapertura ni transición desde estados terminales. Resolver registra fechaResolucion automáticamente; cancelar mantiene fechaResolucion nula (no implica recuperación). El dueño puede cerrar o editar una alerta activa de su mascota desactivada; solo se exige mascota activa al crear y para visibilidad pública. Las operaciones bloquean mascota antes que alerta y vuelven a comprobar el estado para serializar creación, cierres y baja de mascota.
+
+Criterios: proteger recursos ajenos, ocultar datos privados, rechazar campos adicionales y fechas inválidas/futuras, preservar historial, garantizar unicidad bajo concurrencia, registrar fecha de resolución, probar transiciones, conservar migraciones y contratos existentes. Documentar HTTP/Postman y verificar lint, build, pruebas unitarias y PostgreSQL aislado.

@@ -2,6 +2,10 @@
 
 Base URL local: `http://localhost:3000/api/v1`
 
+El módulo de alertas de extravío está documentado en [Alertas de extravío: HTTP y Postman](alertas-extravio.md). Incluye siete endpoints, listado público, historial propio y cierre de alertas; la colección contiene la carpeta **Alertas de extravío**.
+
+El módulo de mascotas y especies está documentado en [Mascotas: HTTP y Postman](mascotas.md), con los ocho endpoints, formularios multipart, edición JSON, permisos por propietario y recuperación de fallos de Cloudinary. La colección Postman incluye la carpeta **Mascotas y especies**.
+
 Para importar en Postman: **Import** → selecciona [smartpet_api.postman_collection.json](./smartpet_api.postman_collection.json).  
 *(Los requests `Register` y `Login` guardan automáticamente `access_token` en las variables de la colección para probar endpoints protegidos sin copiar el token manualmente).*
 
@@ -164,3 +168,25 @@ Para importar en Postman: **Import** → selecciona [smartpet_api.postman_collec
 ### 4. Desactivar establecimiento (Baja lógica) — `DELETE /establecimientos/:id`
 - **Body:** Sin body (actualiza `estado: false`)
 - **Respuestas:** `200 OK`, `404 Not Found`
+
+
+## Avistamientos
+
+API y contratos completos en [specs/avistamientos/design.md](../specs/avistamientos/design.md).
+
+Publicar: `POST /avistamientos`, Bearer JWT, multipart con `especieId`, `descripcion`, `direccion`, `fechaAvistamiento` (ISO8601 con hora y zona), `latitud`, `longitud` y `fotos` (1-5 JPEG/PNG/WebP, hasta 5 MiB por imagen). No enviar propietario, estado, mascota, alerta ni claves de Cloudinary.
+
+- `GET /avistamientos?limit=10&offset=0`: comunidad activa, sin JWT.
+- `GET /avistamientos/mis-avistamientos`: historial propio, con JWT.
+- `GET /avistamientos/:id`: activo publico; historial solo para autor autenticado.
+- `PATCH /avistamientos/:id`: JSON parcial de datos, solo autor de ACTIVO.
+- `PATCH /avistamientos/:id/cerrar` y `/cancelar`: cuerpo `{}`; cierre irreversible del reporte, conserva historial.
+- `POST /avistamientos/:id/fotos`: multipart solo `fotos`.
+- `DELETE /avistamientos/:id/fotos/:fotoId`: conserva al menos una foto; indica `limpiezaPendiente` si el borrado remoto requiere reintento.
+
+Los tres roles gestionan solamente reportes propios. Fechas no futuras, punto obligatorio, coordenadas solo internas del cliente. Estados: ACTIVO, CERRADO, CANCELADO. No se implementan IA ni coincidencias. La carpeta Avistamientos de Postman incluye estas nueve peticiones.
+
+
+## Resguardo institucional y adopciones
+
+[Registro de animales de veterinarias/refugios y catalogo de adopciones](resguardo-adopciones.md). Postman incluye las dos carpetas nuevas.
