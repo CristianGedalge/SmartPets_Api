@@ -1,3 +1,5 @@
+import { Adopcion } from '../src/modules/adopciones/entities/adopcion.entity';
+import { AdopcionesService } from '../src/modules/adopciones/adopciones.service';
 import { AnimalResguardado } from '../src/modules/resguardo/entities/animal-resguardado.entity';
 import {
   EstadoAdopcion,
@@ -58,6 +60,12 @@ integration('Resguardo y adopciones HTTP + PostgreSQL', () => {
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jN1cAAAAASUVORK5CYII=',
     'base64',
   );
+  const adoptionInput = {
+    nombreAdoptante: 'Ana Perez',
+    telefonoAdoptante: '70000001',
+    fechaAdopcion: '2026-11-17',
+    observaciones: 'Entrega realizada',
+  };
   const client = () => request(app.getHttpServer());
   const auth = (index = 0) => `Bearer ${tokens[index]}`;
   const create = (index = 0, extra: Record<string, string> = {}) => {
@@ -118,6 +126,7 @@ integration('Resguardo y adopciones HTTP + PostgreSQL', () => {
         FotoAvistamiento,
         AnimalResguardado,
         PublicacionAdopcion,
+        Adopcion,
       ],
     });
     await db.initialize();
@@ -257,7 +266,7 @@ integration('Resguardo y adopciones HTTP + PostgreSQL', () => {
     await client()
       .patch(`/api/v1/adopciones/${publication.id}/adoptar`)
       .set('Authorization', auth(1))
-      .send({})
+      .send(adoptionInput)
       .expect(404);
     await client()
       .patch(`/api/v1/adopciones/${publication.id}/retirar`)
@@ -338,7 +347,7 @@ integration('Resguardo y adopciones HTTP + PostgreSQL', () => {
       await client()
         .patch(`/api/v1/adopciones/${p.id}/adoptar`)
         .set('Authorization', auth())
-        .send({})
+        .send(adoptionInput)
         .expect(200)
     ).body as Publication;
     expect(adopted.estado).toBe('ADOPTADA');
@@ -411,7 +420,7 @@ integration('Resguardo y adopciones HTTP + PostgreSQL', () => {
         client()
           .patch(`/api/v1/adopciones/${p.id}/${action}`)
           .set('Authorization', auth())
-          .send({}),
+          .send(action === 'adoptar' ? adoptionInput : {}),
       ),
     );
     expect(results.map((r) => r.status).sort()).toEqual([200, 409]);
@@ -427,6 +436,160 @@ integration('Resguardo y adopciones HTTP + PostgreSQL', () => {
     expect(stored.fechaAdopcion != null).toBe(
       stored.estado === EstadoAdopcion.ADOPTADA,
     );
+  });
+  it('registra una sola entrega concurrente y conserva datos solo en la lectura privada propia', async () => {
+    const animal = (await create().expect(201)).body as Animal;
+    const p = (await publish(animal.id).expect(201)).body as Publication;
+    const results = await Promise.all(
+      [0, 1].map(() =>
+        client()
+          .patch(`/api/v1/adopciones/${p.id}/adoptar`)
+          .set('Authorization', auth())
+          .send(adoptionInput),
+      ),
+    );
+    expect(results.map((r) => r.status).sort()).toEqual([200, 409]);
+    expect(
+      await db
+        .getRepository(Adopcion)
+        .countBy({ animalResguardadoId: animal.id }),
+    ).toBe(1);
+    const saved = results.find((r) => r.status === 200)!.body as {
+      registroAdopcion: Record<string, unknown>;
+    };
+    expect(saved.registroAdopcion).toMatchObject(adoptionInput);
+    expect(saved.registroAdopcion).not.toHaveProperty('encargadoId');
+    const mine = await client()
+      .get('/api/v1/adopciones/mis-publicaciones?limit=100')
+      .set('Authorization', auth())
+      .expect(200);
+    expect(JSON.stringify(mine.body)).toContain('Ana Perez');
+    const other = await client()
+      .get('/api/v1/adopciones/mis-publicaciones?limit=100')
+      .set('Authorization', auth(1))
+      .expect(200);
+    expect(JSON.stringify(other.body)).not.toContain('Ana Perez');
+    const catalog = await client()
+      .get('/api/v1/adopciones?limit=100')
+      .expect(200);
+    for (const field of [
+      'registroAdopcion',
+      'nombreAdoptante',
+      'telefonoAdoptante',
+      'observaciones',
+      'Ana Perez',
+    ])
+      expect(JSON.stringify(catalog.body)).not.toContain(field);
+    await client().get(`/api/v1/adopciones/${p.id}`).expect(404);
+  });
+  it('rechaza entrega incompleta sin cambiar estado ni crear registros', async () => {
+    const animal = (await create().expect(201)).body as Animal;
+    const p = (await publish(animal.id).expect(201)).body as Publication;
+    for (const body of [
+      {},
+      { ...adoptionInput, fechaAdopcion: '2026-02-30' },
+      { ...adoptionInput, nombreAdoptante: ' ' },
+    ])
+      await client()
+        .patch(`/api/v1/adopciones/${p.id}/adoptar`)
+        .set('Authorization', auth())
+        .send(body)
+        .expect(400);
+    expect(
+      await db
+        .getRepository(Adopcion)
+        .countBy({ animalResguardadoId: animal.id }),
+    ).toBe(0);
+    expect(
+      (
+        await db
+          .getRepository(PublicacionAdopcion)
+          .findOneByOrFail({ id: p.id })
+      ).estado,
+    ).toBe('PUBLICADA');
+    await client().get(`/api/v1/adopciones/${p.id}`).expect(200);
+  });
+  it('revierte registro y animal si falla la escritura final de la publicacion', async () => {
+    const animal = (await create().expect(201)).body as Animal;
+    const p = (await publish(animal.id).expect(201)).body as Publication;
+    // Constraint scoped to this disposable schema and publication forces a real database failure.
+    await db.query(
+      `ALTER TABLE publicacion_adopcion ADD CONSTRAINT test_adoption_rollback CHECK (id <> '${p.id}' OR estado <> 'ADOPTADA')`,
+    );
+    try {
+      await expect(
+        app.get(AdopcionesService).adopt(users[0], p.id, adoptionInput),
+      ).rejects.toThrow();
+    } finally {
+      await db.query(
+        'ALTER TABLE publicacion_adopcion DROP CONSTRAINT test_adoption_rollback',
+      );
+    }
+    expect(
+      await db
+        .getRepository(Adopcion)
+        .countBy({ animalResguardadoId: animal.id }),
+    ).toBe(0);
+    expect(
+      (
+        await db
+          .getRepository(AnimalResguardado)
+          .findOneByOrFail({ id: animal.id })
+      ).estado,
+    ).toBe('EN_RESGUARDO');
+    expect(
+      (
+        await db
+          .getRepository(PublicacionAdopcion)
+          .findOneByOrFail({ id: p.id })
+      ).estado,
+    ).toBe('PUBLICADA');
+  });
+  it('adoptar exige sesión de encargado y publicación disponible', async () => {
+    const animal = (await create().expect(201)).body as Animal;
+    const p = (await publish(animal.id).expect(201)).body as Publication;
+    await client()
+      .patch(`/api/v1/adopciones/${p.id}/adoptar`)
+      .send(adoptionInput)
+      .expect(401);
+    for (const index of [2, 3])
+      await client()
+        .patch(`/api/v1/adopciones/${p.id}/adoptar`)
+        .set('Authorization', auth(index))
+        .send(adoptionInput)
+        .expect(403);
+    await client()
+      .patch(`/api/v1/adopciones/${p.id}/retirar`)
+      .set('Authorization', auth())
+      .send({})
+      .expect(200);
+    await client()
+      .patch(`/api/v1/adopciones/${p.id}/adoptar`)
+      .set('Authorization', auth())
+      .send(adoptionInput)
+      .expect(409);
+    expect(
+      await db
+        .getRepository(Adopcion)
+        .countBy({ animalResguardadoId: animal.id }),
+    ).toBe(0);
+  });
+  it('lee entregas históricas sin inventar un adoptante', async () => {
+    const animal = (await create().expect(201)).body as Animal;
+    const p = (await publish(animal.id).expect(201)).body as Publication;
+    await db
+      .getRepository(AnimalResguardado)
+      .update(animal.id, { estado: 'ADOPTADO' as AnimalResguardado['estado'] });
+    await db.getRepository(PublicacionAdopcion).update(p.id, {
+      estado: EstadoAdopcion.ADOPTADA,
+      fechaAdopcion: new Date('2026-11-16T00:00:00Z'),
+    });
+    const mine = await client()
+      .get('/api/v1/adopciones/mis-publicaciones?limit=100')
+      .set('Authorization', auth())
+      .expect(200);
+    const items = mine.body as { id: string; registroAdopcion: unknown }[];
+    expect(items.find((item) => item.id === p.id)?.registroAdopcion).toBeNull();
   });
   it('oculta catalogo al desactivar mascota o institucion y bloquea gestion', async () => {
     const animal = (await create().expect(201)).body as Animal;
@@ -444,7 +607,7 @@ integration('Resguardo y adopciones HTTP + PostgreSQL', () => {
     await client()
       .patch(`/api/v1/adopciones/${p.id}/adoptar`)
       .set('Authorization', auth())
-      .send({})
+      .send(adoptionInput)
       .expect(403);
     await db
       .getRepository(Establecimiento)

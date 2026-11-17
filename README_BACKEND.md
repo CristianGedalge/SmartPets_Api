@@ -50,7 +50,7 @@ Los tres roles pueden gestionar sus propias mascotas. En este módulo, ADMIN tam
 
 ## Tablas de la base de datos
 
-Hay **once tablas de negocio** definidas en las entidades y migraciones:
+Hay **doce tablas de negocio** definidas en las entidades y migraciones:
 
 | Tabla | Qué almacena |
 | --- | --- |
@@ -65,6 +65,7 @@ Hay **once tablas de negocio** definidas en las entidades y migraciones:
 | `avistamiento_foto` | Fotos de cada avistamiento, principal y referencia Cloudinary |
 | `animal_resguardado` | Asociacion de una mascota al establecimiento que la cuida y estado de resguardo |
 | `publicacion_adopcion` | Publicacion, requisitos, disponibilidad y fecha de adopcion |
+| `adopcion` | Entrega al adoptante: nombre, teléfono, fecha y observaciones privadas; un registro por animal |
 
 También existen las tablas técnicas `migrations` (historial de TypeORM) y `archivo_pendiente_eliminacion` (cola persistente de limpieza de archivos). Las migraciones incluyen MascotasSchema, AlertasExtravioSchema y AvistamientosSchema; la inicial se conserva.
 
@@ -367,6 +368,8 @@ Nueve endpoints nuevos bajo `/api/v1/avistamientos`, descritos en [contrato de a
 
 Los encargados de veterinarias/refugios activos registran animales bajo `/api/v1/animales-resguardados`. Se reutiliza la ficha de mascota con sus fotos y se crea una asociacion institucional atomica. Las mascotas personales previas no se convierten automaticamente. Publicar para adopcion es un paso independiente mediante `/api/v1/adopciones`.
 
-Estados de resguardo: EN_RESGUARDO y ADOPTADO. Publicaciones: PUBLICADA, RETIRADA y ADOPTADA. Retirar permite republicar; marcar adoptado es terminal y deja la ficha de solo lectura. Catalogo publico con contacto institucional; gestion exclusiva de su ENCARGADO. Sin solicitudes, adoptantes, chat ni IA. [Documentacion HTTP](docs/resguardo-adopciones.md).
+Estados de resguardo: EN_RESGUARDO y ADOPTADO. Publicaciones: PUBLICADA, RETIRADA y ADOPTADA. Retirar permite republicar; marcar adoptado es terminal y deja la ficha de solo lectura. Al registrar la entrega se requieren nombre, teléfono y fecha del adoptante, sin exigir cuenta ni guardar encargado_id. Estos datos solo aparecen en la gestión privada propia. Catalogo publico con contacto institucional; gestion exclusiva de su ENCARGADO. Sin solicitudes, chat ni IA. [Documentacion HTTP](docs/resguardo-adopciones.md).
 
 Migracion `1794952800000-ResguardoAdopcionesSchema.ts`: crea dos tablas e indices, sin modificar tablas previas. No requiere variables ni paquetes nuevos. Rutas web: `/pets` (resguardo), `/adoptions` (gestion) y `/adopciones` (catalogo publico).
+
+Migración `1794956400000-RegistroAdopcionSchema.ts`: añade la tabla `adopcion`; no inventa datos de adoptantes para entregas antiguas. Contrato de `PATCH /adopciones/:id/adoptar` actualizado en Postman y `specs/registro-adopcion/`.

@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AnimalResguardado } from '../../resguardo/entities/animal-resguardado.entity';
+import type { Adopcion } from './adopcion.entity';
 export enum EstadoAdopcion {
   PUBLICADA = 'PUBLICADA',
   RETIRADA = 'RETIRADA',
@@ -15,6 +16,8 @@ export enum EstadoAdopcion {
 }
 @Entity('publicacion_adopcion')
 export class PublicacionAdopcion {
+  // Populated only by private management queries, not a separate database column.
+  registroAdopcion?: Adopcion;
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'animal_resguardado_id', type: 'uuid', unique: true })
   animalResguardadoId: string;

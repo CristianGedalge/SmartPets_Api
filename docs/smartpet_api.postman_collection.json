@@ -2135,7 +2135,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{}",
+              "raw": "{\n  \"nombreAdoptante\": \"Ana Perez\",\n  \"telefonoAdoptante\": \"70000000\",\n  \"fechaAdopcion\": \"2026-11-17\",\n  \"observaciones\": \"Entrega realizada.\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

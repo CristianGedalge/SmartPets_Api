@@ -28,11 +28,26 @@ Registro requiere nombre, especieId y 1-5 fotos JPEG/PNG/WebP de hasta 5 MiB; ad
 | PATCH | /adopciones/:id | ENCARGADO; descripcion y/o requisitos |
 | PATCH | /adopciones/:id/retirar | ENCARGADO; {} |
 | PATCH | /adopciones/:id/publicar | ENCARGADO; {} |
-| PATCH | /adopciones/:id/adoptar | ENCARGADO; {} |
+| PATCH | /adopciones/:id/adoptar | ENCARGADO; nombreAdoptante, telefonoAdoptante, fechaAdopcion, observaciones opcionales |
 
-Descripcion obligatoria (1-2000 caracteres), requisitos opcionales (hasta 2000). Una publicacion por animal; al retirarla puede editarse y republicarse. Marcar adoptado exige PUBLICADA y actualiza atomicamente publicacion ADOPTADA, animal ADOPTADO y fechaAdopcion del servidor. Esa ficha pasa a solo lectura; tampoco puede editarse usando los endpoints personales de mascotas.
+Descripcion obligatoria (1-2000 caracteres), requisitos opcionales (hasta 2000). Una publicacion por animal; al retirarla puede editarse y republicarse. Marcar adoptado exige PUBLICADA y crea atomicamente el registro de entrega, publicacion ADOPTADA y animal ADOPTADO con la fecha recibida. Esa ficha pasa a solo lectura; tampoco puede editarse usando los endpoints personales de mascotas.
 
-El catalogo omite anuncios retirados/adoptados, mascotas desactivadas e instituciones o encargados inactivos. Devuelve fotos, caracteristicas y contacto institucional, sin datos personales del encargado, storageKey ni hashes. Las personas contactan directamente al establecimiento. Sin solicitudes, datos de adoptantes, chat, verificacion ni IA.
+El catalogo omite anuncios retirados/adoptados, mascotas desactivadas e instituciones o encargados inactivos. Devuelve fotos, caracteristicas y contacto institucional, sin datos personales del encargado o adoptante, storageKey ni hashes. Las personas contactan directamente al establecimiento. Sin solicitudes, chat, verificacion ni IA.
+
+## Datos privados de la entrega
+
+La migración `1794956400000-RegistroAdopcionSchema.ts` crea `adopcion`, relacionada por `animal_resguardado_id` único con el animal. No guarda `encargado_id` ni exige cuenta del adoptante. Ejecutar `npm run migration:run` antes de usar esta versión.
+
+```json
+{
+  "nombreAdoptante": "Ana Pérez",
+  "telefonoAdoptante": "70000000",
+  "fechaAdopcion": "2026-11-17",
+  "observaciones": "Entrega realizada."
+}
+```
+
+Nombre y teléfono obligatorios de hasta 150 y 20 caracteres. Fecha calendario válida YYYY-MM-DD, sin hora. Observaciones opcionales hasta 2000 caracteres. No enviar otros identificadores ni estado. `GET /adopciones/mis-publicaciones` y las respuestas de gestión propia incluyen `registroAdopcion` con nombre, teléfono, fecha y observaciones; las rutas públicas no incluyen ese campo. Las adopciones antiguas sin datos conservan `registroAdopcion: null`.
 
 Errores: 400 datos/fotos, 401 sesion, 403 rol/institucion, 404 ajeno/inexistente, 409 duplicado/transicion, 413 tamano y 503 almacenamiento. Ningun rol puede gestionar otra institucion por estas rutas.
 

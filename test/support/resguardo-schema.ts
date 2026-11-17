@@ -1,4 +1,5 @@
 import { QueryRunner } from 'typeorm';
+import { RegistroAdopcionSchema1794956400000 } from '../../src/migrations/1794956400000-RegistroAdopcionSchema';
 import { ResguardoAdopcionesSchema1794952800000 } from '../../src/migrations/1794952800000-ResguardoAdopcionesSchema';
 // Existing integration fixtures create auth tables manually in disposable schemas.
 export async function installInstitutionSchema(runner: QueryRunner) {
@@ -14,4 +15,5 @@ export async function installInstitutionSchema(runner: QueryRunner) {
     "created_at" timestamptz NOT NULL DEFAULT now(),"updated_at" timestamptz NOT NULL DEFAULT now()
   )`);
   await new ResguardoAdopcionesSchema1794952800000().up(runner);
+  await new RegistroAdopcionSchema1794956400000().up(runner);
 }

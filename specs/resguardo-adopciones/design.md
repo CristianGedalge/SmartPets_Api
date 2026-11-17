@@ -14,6 +14,7 @@ Prefijo /api/v1; limit/offset, arreglos con orden createdAt DESC,id ASC.
 - GET /adopciones/mis-publicaciones: ENCARGADO, historial propio.
 - GET /adopciones/:id: publico solo disponible; 404 fuera del catalogo.
 - PATCH /adopciones/:id: ENCARGADO, JSON {descripcion?,requisitos?}, 200; terminal ADOPTADA no editable.
-- PATCH /adopciones/:id/publicar, /retirar, /adoptar: ENCARGADO, cuerpo {}; 200. publicar solo RETIRADA, retirar/adoptar solo PUBLICADA; 409 en transicion invalida.
+- PATCH /adopciones/:id/publicar, /retirar: ENCARGADO, cuerpo {}; 200. publicar solo RETIRADA, retirar solo PUBLICADA; 409 en transicion invalida.
+- PATCH /adopciones/:id/adoptar: ENCARGADO, nombreAdoptante, telefonoAdoptante, fechaAdopcion y observaciones opcionales; solo PUBLICADA. Tabla y contrato privado en ../registro-adopcion/design.md.
 
 Publicacion devuelve id,animalResguardadoId,descripcion,requisitos,estado,fechaAdopcion,createdAt,updatedAt,mascota {id,nombre,especie,razaNombre,sexo,color,pesoKg,edadAproximadaMeses,fotos [{id,url,esPrincipal}]},establecimiento {id,nombre,tipo,direccion,telefono,horarioAtencion}. Sin usuario/credenciales/coordenadas visibles. 400 datos/fotos, 401 sin JWT, 403 rol/establecimiento, 404 ajeno/inexistente, 409 estado/duplicado, 413 tamano, 503 almacenamiento. Las mutaciones no aceptan estado ni claves institucionales salvo animalResguardadoId en creacion de publicacion.

@@ -1,3 +1,4 @@
+import { Adopcion } from '../src/modules/adopciones/entities/adopcion.entity';
 import { AnimalResguardado } from '../src/modules/resguardo/entities/animal-resguardado.entity';
 import { PublicacionAdopcion } from '../src/modules/adopciones/entities/publicacion-adopcion.entity';
 import { installInstitutionSchema } from './support/resguardo-schema';
@@ -111,6 +112,7 @@ integration('Avistamientos HTTP + JWT + PostgreSQL', () => {
         FotoAvistamiento,
         AnimalResguardado,
         PublicacionAdopcion,
+        Adopcion,
       ],
     });
     await db.initialize();

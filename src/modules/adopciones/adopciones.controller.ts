@@ -18,6 +18,7 @@ import {
   AdopcionActionDto,
 } from './dto/publicacion-adopcion.dto';
 import { AdopcionesService } from './adopciones.service';
+import { RegistrarAdopcionDto } from './dto/registrar-adopcion.dto';
 @Controller('adopciones')
 export class AdopcionesController {
   constructor(private readonly adoptions: AdopcionesService) {}
@@ -74,9 +75,8 @@ export class AdopcionesController {
   adopt(
     @GetUser('sub') user: string,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: AdopcionActionDto,
+    @Body() dto: RegistrarAdopcionDto,
   ) {
-    void dto;
-    return this.adoptions.adopt(user, id);
+    return this.adoptions.adopt(user, id, dto);
   }
 }

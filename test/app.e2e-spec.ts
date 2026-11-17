@@ -1,3 +1,5 @@
+import { Adopcion } from '../src/modules/adopciones/entities/adopcion.entity';
+import { RegistroAdopcionSchema1794956400000 } from '../src/migrations/1794956400000-RegistroAdopcionSchema';
 import { ResguardoAdopcionesSchema1794952800000 } from '../src/migrations/1794952800000-ResguardoAdopcionesSchema';
 import { AnimalResguardado } from '../src/modules/resguardo/entities/animal-resguardado.entity';
 import { PublicacionAdopcion } from '../src/modules/adopciones/entities/publicacion-adopcion.entity';
@@ -109,6 +111,7 @@ integration('Mascotas HTTP + JWT + PostgreSQL', () => {
         FotoAvistamiento,
         AnimalResguardado,
         PublicacionAdopcion,
+        Adopcion,
       ],
     });
     await db.initialize();
@@ -518,6 +521,7 @@ integration('Mascotas HTTP + JWT + PostgreSQL', () => {
     const runner = db.createQueryRunner();
     await runner.connect();
     try {
+      await new RegistroAdopcionSchema1794956400000().down(runner);
       await new ResguardoAdopcionesSchema1794952800000().down(runner);
       await new AvistamientosSchema1794945600000().down(runner);
       await alertsMigration.down(runner);
