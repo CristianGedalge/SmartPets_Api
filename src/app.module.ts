@@ -1,5 +1,6 @@
 import { ResguardoModule } from './modules/resguardo/resguardo.module';
 import { AdopcionesModule } from './modules/adopciones/adopciones.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
@@ -44,6 +45,7 @@ import { AlertasExtravioModule } from './modules/alertas-extravio/alertas-extrav
     AvistamientosModule,
     ResguardoModule,
     AdopcionesModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [

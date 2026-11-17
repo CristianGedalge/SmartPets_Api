@@ -29,6 +29,7 @@ Esta documentación describe las entidades, migraciones y controladores presente
 | `avistamientos` | Publicar mascotas vistas, consultar comunidad/historial propio, editar datos y fotos, cerrar o cancelar reportes propios |
 | `resguardo` | Registrar y gestionar animales de veterinarias/refugios asociados a su establecimiento |
 | `adopciones` | Publicar, retirar, republicar y registrar adopciones; catalogo publico institucional |
+| `chat` | Modelo de conversaciones, participantes y mensajes; todavía sin endpoints ni envío en tiempo real |
 | `almacenamiento` | Servicio compartido de Cloudinary y recuperación persistente de borrados y subidas fallidas |
 | `alertas-extravio` | Publicar alertas propias, consultar publicaciones activas e historial y resolver o cancelar alertas |
 
@@ -50,7 +51,7 @@ Los tres roles pueden gestionar sus propias mascotas. En este módulo, ADMIN tam
 
 ## Tablas de la base de datos
 
-Hay **doce tablas de negocio** definidas en las entidades y migraciones:
+Hay **quince tablas de negocio** definidas en las entidades y migraciones:
 
 | Tabla | Qué almacena |
 | --- | --- |
@@ -66,6 +67,9 @@ Hay **doce tablas de negocio** definidas en las entidades y migraciones:
 | `animal_resguardado` | Asociacion de una mascota al establecimiento que la cuida y estado de resguardo |
 | `publicacion_adopcion` | Publicacion, requisitos, disponibilidad y fecha de adopcion |
 | `adopcion` | Entrega al adoptante: nombre, teléfono, fecha y observaciones privadas; un registro por animal |
+| `conversacion` | Contexto de una conversación: una alerta o un avistamiento |
+| `participante_conversacion` | Usuarios participantes y última lectura; usuario único por conversación |
+| `mensaje` | Texto, participante remitente y fecha de envío |
 
 También existen las tablas técnicas `migrations` (historial de TypeORM) y `archivo_pendiente_eliminacion` (cola persistente de limpieza de archivos). Las migraciones incluyen MascotasSchema, AlertasExtravioSchema y AvistamientosSchema; la inicial se conserva.
 
