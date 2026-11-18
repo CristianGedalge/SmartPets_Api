@@ -29,7 +29,7 @@ Esta documentación describe las entidades, migraciones y controladores presente
 | `avistamientos` | Publicar mascotas vistas, consultar comunidad/historial propio, editar datos y fotos, cerrar o cancelar reportes propios |
 | `resguardo` | Registrar y gestionar animales de veterinarias/refugios asociados a su establecimiento |
 | `adopciones` | Publicar, retirar, republicar y registrar adopciones; catalogo publico institucional |
-| `chat` | Modelo de conversaciones, participantes y mensajes; todavía sin endpoints ni envío en tiempo real |
+| `chat` | Conversaciones privadas sobre alertas/avistamientos, mensajes persistentes, pendientes y avisos Socket.IO autenticados |
 | `almacenamiento` | Servicio compartido de Cloudinary y recuperación persistente de borrados y subidas fallidas |
 | `alertas-extravio` | Publicar alertas propias, consultar publicaciones activas e historial y resolver o cancelar alertas |
 
@@ -377,3 +377,7 @@ Estados de resguardo: EN_RESGUARDO y ADOPTADO. Publicaciones: PUBLICADA, RETIRAD
 Migracion `1794952800000-ResguardoAdopcionesSchema.ts`: crea dos tablas e indices, sin modificar tablas previas. No requiere variables ni paquetes nuevos. Rutas web: `/pets` (resguardo), `/adoptions` (gestion) y `/adopciones` (catalogo publico).
 
 Migración `1794956400000-RegistroAdopcionSchema.ts`: añade la tabla `adopcion`; no inventa datos de adoptantes para entregas antiguas. Contrato de `PATCH /adopciones/:id/adoptar` actualizado en Postman y `specs/registro-adopcion/`.
+
+## Chat privado
+
+El modulo chat ofrece endpoints JWT bajo `/api/v1/chat/conversaciones` y avisos Socket.IO autenticados en namespace `/chat`. Mensajes persistentes, historial paginado, idempotencia por UUID y pendientes de lectura. Las salas y destinatarios se deducen en el servidor. Reutiliza la migracion ChatSchema1794960000000; no cambia env. Instalar dependencias y reiniciar backend. [Contrato HTTP y tiempo real](docs/chat.md).

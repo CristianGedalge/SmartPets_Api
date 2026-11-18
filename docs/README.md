@@ -190,3 +190,7 @@ Los tres roles gestionan solamente reportes propios. Fechas no futuras, punto ob
 ## Resguardo institucional y adopciones
 
 [Registro de animales de veterinarias/refugios y catalogo de adopciones](resguardo-adopciones.md). Postman incluye las dos carpetas nuevas.
+
+## Chat privado
+
+[HTTP, Socket.IO y recuperacion del historial](chat.md). Postman incluye la carpeta Chat privado.

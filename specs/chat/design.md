@@ -8,7 +8,7 @@ mensaje: id uuid PK, participante_id uuid FK participante_conversacion CASCADE, 
 
 Relaciones unidireccionales a las entidades existentes para no alterar módulos de usuarios/alertas/avistamientos. Relaciones inversas dentro de chat. ChatModule usa TypeOrmModule.forFeature y se registra en AppModule. Migración ChatSchema1794960000000; reversión en orden mensaje, participante_conversacion, conversacion. Sin dependencias ni env nuevos.
 
-## Próxima etapa de servicios
+## Servicios (contrato completo en implementacion.md)
 
 Abrir chat: bloquear la publicación en transacción, obtener su propietario (alerta → mascota.usuarioId; avistamiento → usuarioId), validar ambos usuarios y buscar conversación que contenga exactamente la pareja antes de crear otra y sus dos participantes. La serialización sobre la publicación evita duplicados concurrentes. Enviar/leer: identificar participante desde JWT y verificar pertenencia; nunca devolver entidades Usuario sin selección explícita de campos públicos. Los eventos en tiempo real requerirán el mismo control.
 

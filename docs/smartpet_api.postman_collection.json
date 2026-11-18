@@ -65,6 +65,16 @@
       "key": "publicacion_adopcion_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "conversacion_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mensaje_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -2136,6 +2146,297 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nombreAdoptante\": \"Ana Perez\",\n  \"telefonoAdoptante\": \"70000000\",\n  \"fechaAdopcion\": \"2026-11-17\",\n  \"observaciones\": \"Entrega realizada.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chat privado",
+      "description": "JWT. WebSocket /chat; auth {token}; evento chat:actualizado. Para reintentar un mensaje reutilizar el mismo UUID enviado.",
+      "item": [
+        {
+          "name": "Abrir chat de alerta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alertaId\": \"{{alerta_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('conversacion_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Abrir chat de avistamiento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"avistamientoId\": \"{{avistamiento_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('conversacion_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mi bandeja",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones?limit=20&offset=0"
+          },
+          "response": []
+        },
+        {
+          "name": "Detalle propio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones/{{conversacion_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Ultimos mensajes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones/{{conversacion_id}}/mensajes?limit=30"
+          },
+          "response": []
+        },
+        {
+          "name": "Mensajes anteriores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones/{{conversacion_id}}/mensajes?antesDe={{mensaje_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Recuperar nuevos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones/{{conversacion_id}}/mensajes?despuesDe={{mensaje_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones/{{conversacion_id}}/mensajes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{$guid}}\",\n  \"contenido\": \"Creo que vi a tu mascota.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('mensaje_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar lectura",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/chat/conversaciones/{{conversacion_id}}/lectura",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mensajeId\": \"{{mensaje_id}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
