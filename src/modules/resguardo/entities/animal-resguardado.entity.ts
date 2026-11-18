@@ -16,22 +16,28 @@ export enum EstadoResguardo {
 }
 @Entity('animal_resguardado')
 export class AnimalResguardado {
-  @PrimaryGeneratedColumn('uuid') id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
   @Column({ name: 'mascota_id', type: 'uuid', unique: true }) mascotaId: string;
   @OneToOne(() => Mascota, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'mascota_id' })
   mascota: Mascota;
+
   @Column({ name: 'establecimiento_id', type: 'uuid' })
   establecimientoId: string;
+
   @ManyToOne(() => Establecimiento, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'establecimiento_id' })
   establecimiento: Establecimiento;
+
   @Column({
     type: 'varchar',
     length: 20,
     default: EstadoResguardo.EN_RESGUARDO,
   })
   estado: EstadoResguardo;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
