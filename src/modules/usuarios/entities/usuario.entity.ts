@@ -49,6 +49,14 @@ export class Usuario {
   @Column({ type: 'boolean', nullable: false, default: true })
   estado: boolean;
 
+  @Column({
+    name: 'email_verificado',
+    type: 'boolean',
+    nullable: false,
+    default: false,
+  })
+  emailVerificado: boolean;
+
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamptz',

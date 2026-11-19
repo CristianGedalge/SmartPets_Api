@@ -9,6 +9,11 @@ import { SuscripcionesService } from './suscripciones.service';
 export class PagosController {
   constructor(private readonly suscripciones: SuscripcionesService) {}
 
+  @Get('planes/publicos')
+  planesPublicos() {
+    return this.suscripciones.listarDisponibles();
+  }
+
   @Get('planes')
   @AuthRole(RolNombre.CIUDADANO)
   planes() {
@@ -18,6 +23,6 @@ export class PagosController {
   @Post()
   @AuthRole(RolNombre.CIUDADANO)
   pagar(@GetUser('sub') usuarioId: string, @Body() dto: CrearPagoDto) {
-    return this.suscripciones.pagar(usuarioId, dto.planId);
+    return this.suscripciones.pagar(usuarioId, dto);
   }
 }

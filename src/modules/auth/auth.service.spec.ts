@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { scryptSync } from 'crypto';
 import { DataSource } from 'typeorm';
 import {
   Establecimiento,
@@ -13,6 +14,9 @@ import { Rol, RolNombre } from '../roles/entities/rol.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { SuscripcionesService } from '../suscripciones/suscripciones.service';
 import { AuthService } from './auth.service';
+import { AuthEmailService } from './auth-email.service';
+import { VerificacionEmail } from './entities/verificacion-email.entity';
+import { AceptacionLegal } from './entities/aceptacion-legal.entity';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
@@ -30,12 +34,23 @@ describe('AuthService', () => {
     findOne: jest.fn(),
   };
 
+  const mockVerificacionRepo = {
+    findOne: jest.fn(),
+    create: jest.fn((value: unknown) => value),
+    save: jest.fn(),
+    delete: jest.fn(),
+  };
+
+  const mockAceptacionRepo = { findOne: jest.fn() };
+
   const mockManager = {
     create: jest.fn(),
     preload: jest.fn(),
     findOne: jest.fn(),
     save: jest.fn(),
     insert: jest.fn().mockResolvedValue({}),
+    update: jest.fn().mockResolvedValue({}),
+    delete: jest.fn().mockResolvedValue({}),
   };
 
   const mockDataSource = {
@@ -53,6 +68,11 @@ describe('AuthService', () => {
     resumen: jest.fn().mockResolvedValue(null),
   };
 
+  const mockAuthEmail = {
+    sendVerification: jest.fn().mockResolvedValue(true),
+    sendWelcome: jest.fn().mockResolvedValue(true),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -61,9 +81,18 @@ describe('AuthService', () => {
         AuthService,
         { provide: getRepositoryToken(Usuario), useValue: mockUsuarioRepo },
         { provide: getRepositoryToken(Rol), useValue: mockRolRepo },
+        {
+          provide: getRepositoryToken(VerificacionEmail),
+          useValue: mockVerificacionRepo,
+        },
+        {
+          provide: getRepositoryToken(AceptacionLegal),
+          useValue: mockAceptacionRepo,
+        },
         { provide: DataSource, useValue: mockDataSource },
         { provide: JwtService, useValue: mockJwtService },
         { provide: SuscripcionesService, useValue: mockSuscripciones },
+        { provide: AuthEmailService, useValue: mockAuthEmail },
       ],
     }).compile();
 
@@ -94,6 +123,7 @@ describe('AuthService', () => {
       mockManager.create.mockReturnValueOnce(savedUsuario);
       mockManager.save.mockResolvedValueOnce(savedUsuario);
       mockJwtService.signAsync.mockResolvedValue('jwt-token');
+      mockVerificacionRepo.findOne.mockResolvedValue(null);
 
       const result = await service.register({
         aceptaTerminos: true,
@@ -114,22 +144,13 @@ describe('AuthService', () => {
       });
       expect(mockDataSource.transaction).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
-        access_token: 'jwt-token',
-        usuario: {
-          id: 'user-uuid',
-          rolId: 2,
-          nombre: 'Ana',
-          apellido: 'Pérez',
-          telefono: '70012345',
-          fotoUrl: null,
-          email: 'ana@ejemplo.com',
-          rol: RolNombre.CIUDADANO,
-          estado: true,
-          establecimiento: null,
-          suscripcion: null,
-        },
+        requiereVerificacion: true,
+        email: 'ana@ejemplo.com',
+        emailEnmascarado: 'an*@ejemplo.com',
+        correoEnviado: true,
       });
-      expect(result.usuario).not.toHaveProperty('passwordHash');
+      expect(result).not.toHaveProperty('access_token');
+      expect(mockAuthEmail.sendVerification).toHaveBeenCalledTimes(1);
       expect(mockSuscripciones.asignarGratis).toHaveBeenCalledWith(
         mockManager,
         savedUsuario.id,
@@ -266,10 +287,14 @@ describe('AuthService', () => {
         password: 'MiPassword123',
       });
 
-      expect(result.access_token).toBe('jwt-token');
-      expect(result.usuario.email).toBe('ana@ejemplo.com');
-      expect(result.usuario.rol).toBe(RolNombre.CIUDADANO);
-      expect(result.usuario.establecimiento).toBeNull();
+      expect(result).toMatchObject({
+        access_token: 'jwt-token',
+        usuario: {
+          email: 'ana@ejemplo.com',
+          rol: RolNombre.CIUDADANO,
+          establecimiento: null,
+        },
+      });
     });
 
     it('CA-05: lanza UnauthorizedException (401) si el usuario no existe', async () => {
@@ -307,6 +332,56 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: 'ana@ejemplo.com', password: 'WrongPassword' }),
       ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  describe('verifyEmail', () => {
+    it('verifica un código vigente, elimina el desafío y crea la sesión', async () => {
+      const salt = '0123456789abcdef0123456789abcdef';
+      const usuario = {
+        id: 'user-uuid',
+        nombre: 'Ana',
+        apellido: 'Pérez',
+        email: 'ana@ejemplo.com',
+        passwordHash: 'hashed_pw',
+        estado: true,
+        emailVerificado: false,
+        rol: { id: 2, nombre: RolNombre.CIUDADANO },
+        establecimiento: undefined,
+      };
+      mockUsuarioRepo.findOne.mockResolvedValue(usuario);
+      mockVerificacionRepo.findOne.mockResolvedValue({
+        usuarioId: usuario.id,
+        salt,
+        codigoHash: scryptSync('123456', salt, 64).toString('hex'),
+        expiraEn: new Date(Date.now() + 60_000),
+        enviadoEn: new Date(),
+        intentos: 0,
+      });
+      mockAceptacionRepo.findOne.mockResolvedValue({
+        versionTerminos: LEGAL_VERSION,
+      });
+      mockJwtService.signAsync.mockResolvedValue('jwt-verificado');
+
+      const result = await service.verifyEmail({
+        email: usuario.email,
+        codigo: '123456',
+      });
+
+      expect(mockManager.update).toHaveBeenCalledWith(
+        Usuario,
+        { id: usuario.id },
+        { emailVerificado: true },
+      );
+      expect(mockManager.delete).toHaveBeenCalledWith(VerificacionEmail, {
+        usuarioId: usuario.id,
+      });
+      expect(mockAuthEmail.sendWelcome).toHaveBeenCalledWith(
+        usuario.email,
+        usuario.nombre,
+        LEGAL_VERSION,
+      );
+      expect(result.access_token).toBe('jwt-verificado');
     });
   });
 

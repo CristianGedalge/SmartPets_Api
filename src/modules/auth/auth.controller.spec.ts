@@ -11,6 +11,8 @@ describe('AuthController', () => {
     login: jest.fn(),
     getProfile: jest.fn(),
     updateProfile: jest.fn(),
+    verifyEmail: jest.fn(),
+    resendVerification: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -48,6 +50,22 @@ describe('AuthController', () => {
 
     await expect(controller.login(dto)).resolves.toEqual(expected);
     expect(mockAuthService.login).toHaveBeenCalledWith(dto);
+  });
+
+  it('delega la verificación y el reenvío de correo', async () => {
+    const verification = { email: 'ana@ejemplo.com', codigo: '123456' };
+    const resend = { email: 'ana@ejemplo.com' };
+    mockAuthService.verifyEmail.mockResolvedValue({ access_token: 'jwt' });
+    mockAuthService.resendVerification.mockResolvedValue({ enviado: true });
+
+    await expect(controller.verifyEmail(verification)).resolves.toEqual({
+      access_token: 'jwt',
+    });
+    await expect(controller.resendVerification(resend)).resolves.toEqual({
+      enviado: true,
+    });
+    expect(mockAuthService.verifyEmail).toHaveBeenCalledWith(verification);
+    expect(mockAuthService.resendVerification).toHaveBeenCalledWith(resend);
   });
 
   it('delega getProfile usando userId extraído con @GetUser', async () => {

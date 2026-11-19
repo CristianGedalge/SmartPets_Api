@@ -1,4 +1,4 @@
-import { ServiceUnavailableException } from '@nestjs/common';
+import { Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ContactoService } from './contacto.service';
 
 const dto = {
@@ -14,9 +14,14 @@ const enabledConfig = {
   senderEmail: 'sender@example.com',
   senderName: 'SmartPet',
   recipientEmail: 'admin@example.com',
+  publicWebUrl: 'https://smartpet.example',
 };
 
 describe('ContactoService', () => {
+  beforeEach(() => {
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+  });
+
   afterEach(() => jest.restoreAllMocks());
 
   it('envía al administrador, configura replyTo y escapa el HTML', async () => {

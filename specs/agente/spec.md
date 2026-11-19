@@ -14,6 +14,10 @@ Permitir que un ciudadano autenticado consulte un asistente de SmartPet desde la
 - La conversación no se persiste en la base de datos.
 - Se limita el número de consultas por usuario para controlar abuso y costo.
 - Los errores del proveedor no revelan credenciales ni respuestas internas.
+- El asistente público del sitio empresarial conoce el propósito de SmartPet, sus públicos, canales, funciones, planes, proceso de adopción, portal de establecimientos, contacto y documentos legales.
+- El asistente público distingue entre el sitio empresarial, la aplicación móvil ciudadana y el portal de establecimientos.
+- El contexto incluye orientación práctica para mascotas extraviadas, animales encontrados, adopciones y registro de establecimientos, sin atribuirse acciones que no puede realizar.
+- Las respuestas protegen datos personales, no solicitan credenciales ni información de pago y no presentan coincidencias visuales como identificaciones confirmadas.
 
 ## Criterios de aceptación
 

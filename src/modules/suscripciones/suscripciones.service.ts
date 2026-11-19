@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { randomUUID } from 'crypto';
 import {
   DataSource,
   EntityManager,
@@ -16,6 +17,7 @@ import {
 import { RolNombre } from '../roles/entities/rol.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
 import { CreatePlanDto, UpdatePlanDto } from './dto/plan.dto';
+import { CrearPagoDto } from './dto/crear-pago.dto';
 import { Consumo } from './entities/consumo.entity';
 import { EstadoPago, Pago } from './entities/pago.entity';
 import { Plan } from './entities/plan.entity';
@@ -149,9 +151,10 @@ export class SuscripcionesService {
       .then((planes) => planes.map((plan) => this.planPublico(plan)));
   }
 
-  async pagar(usuarioId: string, planId: string) {
+  async pagar(usuarioId: string, dto: CrearPagoDto) {
     await this.exigirCiudadano(usuarioId);
-    const plan = await this.planes.findOneBy({ id: planId });
+    const tarjeta = this.validarTarjetaSimulada(dto);
+    const plan = await this.planes.findOneBy({ id: dto.planId });
     if (!plan?.activo) {
       throw new BadRequestException('Selecciona un plan activo.');
     }
@@ -184,6 +187,9 @@ export class SuscripcionesService {
           monto: monto.toFixed(2),
           moneda: 'BOB',
           estado: EstadoPago.PAGADO,
+          metodoPago: tarjeta.marca,
+          ultimosCuatro: tarjeta.ultimosCuatro,
+          referencia: tarjeta.referencia,
         }),
       );
     });
@@ -192,6 +198,12 @@ export class SuscripcionesService {
       moneda: 'BOB',
       plan: plan.nombre,
       vence: fin.toISOString(),
+      modoPrueba: true,
+      pago: {
+        referencia: tarjeta.referencia,
+        metodo: tarjeta.marca,
+        ultimosCuatro: tarjeta.ultimosCuatro,
+      },
       suscripcion: await this.resumen(usuarioId),
     };
   }
@@ -301,6 +313,36 @@ export class SuscripcionesService {
     return usuario;
   }
 
+  private validarTarjetaSimulada(dto: CrearPagoDto) {
+    if (!luhn(dto.numeroTarjeta)) {
+      throw new BadRequestException('El número de tarjeta no es válido.');
+    }
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    if (
+      dto.anioExpiracion < currentYear ||
+      (dto.anioExpiracion === currentYear && dto.mesExpiracion < currentMonth)
+    ) {
+      throw new BadRequestException('La tarjeta de prueba está vencida.');
+    }
+    if (dto.numeroTarjeta === '4000000000000002') {
+      throw new BadRequestException(
+        'Pago rechazado por la tarjeta de prueba. Usa la tarjeta aprobada para continuar.',
+      );
+    }
+    if (dto.numeroTarjeta !== '4242424242424242') {
+      throw new BadRequestException(
+        'Este entorno solo acepta las tarjetas de demostración indicadas en la app.',
+      );
+    }
+    return {
+      marca: 'VISA_SIMULADA',
+      ultimosCuatro: dto.numeroTarjeta.slice(-4),
+      referencia: `SIM-${randomUUID().replaceAll('-', '').slice(0, 16).toUpperCase()}`,
+    };
+  }
+
   private async guardarPlan(plan: Plan) {
     try {
       return await this.planes.save(plan);
@@ -357,4 +399,19 @@ function esUnico(error: unknown) {
     error instanceof QueryFailedError &&
     (error.driverError as { code?: string }).code === '23505'
   );
+}
+
+function luhn(number: string) {
+  let total = 0;
+  let doubleDigit = false;
+  for (let index = number.length - 1; index >= 0; index -= 1) {
+    let digit = Number(number[index]);
+    if (doubleDigit) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    total += digit;
+    doubleDigit = !doubleDigit;
+  }
+  return total % 10 === 0;
 }

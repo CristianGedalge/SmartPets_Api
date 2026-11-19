@@ -49,6 +49,15 @@ export class Pago {
   @Column({ type: 'varchar', length: 20 })
   estado: EstadoPago;
 
+  @Column({ name: 'metodo_pago', type: 'varchar', length: 30 })
+  metodoPago: string;
+
+  @Column({ name: 'ultimos_cuatro', type: 'varchar', length: 4 })
+  ultimosCuatro: string;
+
+  @Column({ type: 'varchar', length: 50, unique: true })
+  referencia: string;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 }

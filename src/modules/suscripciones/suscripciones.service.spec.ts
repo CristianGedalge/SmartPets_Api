@@ -185,7 +185,14 @@ describe('SuscripcionesService', () => {
       dataSource,
     );
 
-    const result = await service.pagar('citizen-1', paidPlan.id);
+    const result = await service.pagar('citizen-1', {
+      planId: paidPlan.id,
+      titular: 'Ana Perez',
+      numeroTarjeta: '4242424242424242',
+      mesExpiracion: 12,
+      anioExpiracion: 2030,
+      cvv: '123',
+    });
 
     expect(manager.create).toHaveBeenCalledWith(
       Pago,
@@ -194,8 +201,40 @@ describe('SuscripcionesService', () => {
         suscripcionId: createdSubscription.id,
         monto: '29.00',
         estado: 'PAGADO',
+        metodoPago: 'VISA_SIMULADA',
+        ultimosCuatro: '4242',
       }),
     );
+    expect(result.modoPrueba).toBe(true);
+    expect(result.pago.ultimosCuatro).toBe('4242');
+    expect(result.pago.referencia).toMatch(/^SIM-/);
     expect(result.suscripcion.plan).toBe('Plus');
+  });
+
+  it('rechaza la tarjeta de prueba denegada antes de crear la suscripción', async () => {
+    const transaction = jest.fn();
+    const service = new SuscripcionesService(
+      {} as Repository<Plan>,
+      {} as Repository<Suscripcion>,
+      {} as Repository<Consumo>,
+      {
+        findOne: jest.fn().mockResolvedValue({
+          rol: { nombre: 'CIUDADANO' },
+        }),
+      } as unknown as Repository<Usuario>,
+      { transaction } as unknown as DataSource,
+    );
+
+    await expect(
+      service.pagar('citizen-1', {
+        planId: 'plan-plus',
+        titular: 'Ana Perez',
+        numeroTarjeta: '4000000000000002',
+        mesExpiracion: 12,
+        anioExpiracion: 2030,
+        cvv: '123',
+      }),
+    ).rejects.toThrow('Pago rechazado');
+    expect(transaction).not.toHaveBeenCalled();
   });
 });

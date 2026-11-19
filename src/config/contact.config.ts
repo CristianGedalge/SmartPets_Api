@@ -9,6 +9,8 @@ export const contactConfig = registerAs('contact', () => {
   const recipientEmail =
     process.env.CONTACT_RECIPIENT_EMAIL?.trim() ||
     'cristian.gedalge2018@gmail.com';
+  const publicWebUrl =
+    process.env.PUBLIC_WEB_URL?.trim() || 'https://smartpet.gedalge.dev';
 
   if (Boolean(apiKey) !== Boolean(senderEmail)) {
     throw new Error(
@@ -28,5 +30,6 @@ export const contactConfig = registerAs('contact', () => {
     senderEmail,
     senderName,
     recipientEmail,
+    publicWebUrl,
   };
 });
