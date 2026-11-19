@@ -1,0 +1,16 @@
+services:
+  smartpet_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartpet_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3000}:3000"
+    # Permite que el contenedor alcance servicios en la máquina anfitriona
+    # (por ejemplo smartpet_ia en host.docker.internal:8001 o Postgres en el host),
+    # además de cualquier base de datos externa (RDS, Supabase, otro servidor).
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
