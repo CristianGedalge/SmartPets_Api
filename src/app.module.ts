@@ -1,12 +1,21 @@
 import { ResguardoModule } from './modules/resguardo/resguardo.module';
 import { AdopcionesModule } from './modules/adopciones/adopciones.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { AnaliticaModule } from './modules/analitica/analitica.module';
+import { BusquedaVisualModule } from './modules/busqueda-visual/busqueda-visual.module';
+import { ContactoModule } from './modules/contacto/contacto.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseExceptionFilter } from './common/filters/database-exception.filter';
-import { cloudinaryConfig, databaseConfig, jwtConfig } from './config';
+import {
+  cloudinaryConfig,
+  databaseConfig,
+  jwtConfig,
+  iaConfig,
+  contactConfig,
+} from './config';
 import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
@@ -20,7 +29,13 @@ import { AlertasExtravioModule } from './modules/alertas-extravio/alertas-extrav
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, jwtConfig, cloudinaryConfig],
+      load: [
+        databaseConfig,
+        jwtConfig,
+        cloudinaryConfig,
+        iaConfig,
+        contactConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync({
       inject: [databaseConfig.KEY],
@@ -46,6 +61,9 @@ import { AlertasExtravioModule } from './modules/alertas-extravio/alertas-extrav
     ResguardoModule,
     AdopcionesModule,
     ChatModule,
+    AnaliticaModule,
+    BusquedaVisualModule,
+    ContactoModule,
   ],
   controllers: [],
   providers: [

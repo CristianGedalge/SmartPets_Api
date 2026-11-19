@@ -79,6 +79,44 @@
   ],
   "item": [
     {
+      "name": "Contacto empresarial",
+      "description": "Formulario público del sitio empresarial. Envía mediante Brevo al correo administrativo; no requiere JWT.",
+      "item": [
+        {
+          "name": "Enviar mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana Pérez\",\n  \"email\": \"ana@example.com\",\n  \"asunto\": \"Consulta general\",\n  \"mensaje\": \"Quiero recibir más información sobre SmartPet.\",\n  \"sitioWeb\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/contacto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "contacto"
+              ]
+            },
+            "description": "Público. Responde 201 si Brevo acepta el mensaje; 400 por datos inválidos, 429 por límite y 503 si el proveedor no está disponible."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Auth",
       "description": "Endpoints de autenticación y perfil de usuario (JWT).",
       "item": [
@@ -110,7 +148,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Pérez\",\n  \"email\": \"ana@ejemplo.com\",\n  \"password\": \"MiPassword123\",\n  \"telefono\": \"70012345\",\n  \"fotoUrl\": \"https://ejemplo.com/foto.jpg\"\n}",
+              "raw": "{\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Pérez\",\n  \"email\": \"ana@ejemplo.com\",\n  \"password\": \"MiPassword123\",\n  \"telefono\": \"70012345\",\n  \"fotoUrl\": \"https://ejemplo.com/foto.jpg\",\n  \"aceptaTerminos\": true,\n  \"aceptaPrivacidad\": true,\n  \"versionLegal\": \"2026-11-18.1\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -159,7 +197,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Gómez\",\n  \"email\": \"carlos@veterinaria.com\",\n  \"password\": \"MiPassword123\",\n  \"telefono\": \"71122334\",\n  \"fotoUrl\": \"https://ejemplo.com/encargado.jpg\",\n  \"establecimiento\": {\n    \"nombre\": \"Veterinaria San Roque\",\n    \"tipo\": \"VETERINARIA\",\n    \"descripcion\": \"Atención médica veterinaria general y emergencias\",\n    \"direccion\": \"Av. Busch #450\",\n    \"latitud\": -17.783327,\n    \"longitud\": -63.182140,\n    \"telefono\": \"33445566\",\n    \"horarioAtencion\": \"Lun-Sab 08:00-20:00\"\n  }\n}",
+              "raw": "{\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Gómez\",\n  \"email\": \"carlos@veterinaria.com\",\n  \"password\": \"MiPassword123\",\n  \"telefono\": \"71122334\",\n  \"fotoUrl\": \"https://ejemplo.com/encargado.jpg\",\n  \"establecimiento\": {\n    \"nombre\": \"Veterinaria San Roque\",\n    \"tipo\": \"VETERINARIA\",\n    \"descripcion\": \"Atención médica veterinaria general y emergencias\",\n    \"direccion\": \"Av. Busch #450\",\n    \"latitud\": -17.783327,\n    \"longitud\": -63.18214,\n    \"telefono\": \"33445566\",\n    \"horarioAtencion\": \"Lun-Sab 08:00-20:00\"\n  },\n  \"aceptaTerminos\": true,\n  \"aceptaPrivacidad\": true,\n  \"versionLegal\": \"2026-11-18.1\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2443,6 +2481,143 @@
                 }
               }
             }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analítica",
+      "item": [
+        {
+          "name": "Mapa de calor - alertas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analitica/mapa-calor?tipo=ALERTAS&estado=ACTIVA",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analitica",
+                "mapa-calor"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "ALERTAS"
+                },
+                {
+                  "key": "estado",
+                  "value": "ACTIVA"
+                },
+                {
+                  "key": "desde",
+                  "value": "2026-11-01",
+                  "disabled": true
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-11-18",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "ADMIN o ENCARGADO. Puntos agrupados y cantidades; sin datos personales. Fechas inclusivas UTC-04. Ver docs/analitica.md."
+          },
+          "response": []
+        },
+        {
+          "name": "Mapa de calor - avistamientos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/analitica/mapa-calor?tipo=AVISTAMIENTOS&estado=ACTIVO",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analitica",
+                "mapa-calor"
+              ],
+              "query": [
+                {
+                  "key": "tipo",
+                  "value": "AVISTAMIENTOS"
+                },
+                {
+                  "key": "estado",
+                  "value": "ACTIVO"
+                },
+                {
+                  "key": "desde",
+                  "value": "2026-11-01",
+                  "disabled": true
+                },
+                {
+                  "key": "hasta",
+                  "value": "2026-11-18",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "ADMIN o ENCARGADO. Puntos agrupados y cantidades; sin datos personales. Fechas inclusivas UTC-04. Ver docs/analitica.md."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Busqueda visual",
+      "item": [
+        {
+          "name": "Buscar avistamientos por foto (CIUDADANO)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "especieId",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "fotos",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/busqueda-visual/avistamientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "busqueda-visual",
+                "avistamientos"
+              ]
+            },
+            "description": "JWT CIUDADANO. 1-5 fotos JPEG/PNG/WebP, hasta 5 MiB cada una. Especie Perro/Gato. Requiere Python y migracion de embeddings. Devuelve hasta cinco candidatos, no certeza de identidad. Ver docs/busqueda-visual.md."
           },
           "response": []
         }

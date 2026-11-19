@@ -1,6 +1,11 @@
 ﻿# SmartPet API
 
+El registro exige aceptar términos y privacidad y guarda la versión y fecha en la nueva tabla `aceptacion_legal`. Consulta el [contrato y la migración de aceptación legal](docs/legal.md); Postman incluye los campos obligatorios.
+
+
 Backend de SmartPet desarrollado con **NestJS, TypeScript, PostgreSQL y TypeORM**. Implementa autenticación, roles, administración de usuarios y establecimientos, especies, mascotas propias con fotografías en Cloudinary y alertas de extravío y avistamientos.
+
+El módulo `contacto` expone el formulario empresarial público y entrega sus mensajes mediante Brevo al correo administrativo, sin persistirlos en la base de datos. Consulta [docs/contacto.md](docs/contacto.md).
 
 Esta documentación describe las entidades, migraciones y controladores presentes en el repositorio. No representa una inspección de una base de datos en ejecución.
 
@@ -21,6 +26,7 @@ Esta documentación describe las entidades, migraciones y controladores presente
 | Módulo | Responsabilidades |
 | --- | --- |
 | `auth` | Registrar ciudadanos o encargados, iniciar sesión, emitir JWT y consultar/actualizar el perfil propio |
+| `contacto` | Recibir consultas públicas del sitio empresarial y enviarlas al correo administrativo mediante Brevo |
 | `roles` | Permitir al administrador consultar los roles disponibles |
 | `usuarios` | Listar, consultar, editar y desactivar usuarios; acceso exclusivo de administrador |
 | `establecimientos` | Listar, consultar, editar y desactivar veterinarias o refugios; acceso exclusivo de administrador |
@@ -30,6 +36,8 @@ Esta documentación describe las entidades, migraciones y controladores presente
 | `resguardo` | Registrar y gestionar animales de veterinarias/refugios asociados a su establecimiento |
 | `adopciones` | Publicar, retirar, republicar y registrar adopciones; catalogo publico institucional |
 | `chat` | Conversaciones privadas sobre alertas/avistamientos, mensajes persistentes, pendientes y avisos Socket.IO autenticados |
+| `analitica` | Concentración geográfica de alertas y avistamientos para ADMIN y ENCARGADO; agregados sin datos personales |
+| `busqueda-visual` | Consulta de avistamientos similares por fotos para CIUDADANO, con servicio ONNX interno y caché de vectores |
 | `almacenamiento` | Servicio compartido de Cloudinary y recuperación persistente de borrados y subidas fallidas |
 | `alertas-extravio` | Publicar alertas propias, consultar publicaciones activas e historial y resolver o cancelar alertas |
 
@@ -220,6 +228,7 @@ Prefijo global: `/api/v1`. URL local por defecto: `http://localhost:3000/api/v1`
 | Método | Ruta sin prefijo | Acceso | Operación |
 | --- | --- | --- | --- |
 | `POST` | `/auth/register` | Público | Registrar ciudadano o encargado con establecimiento |
+| `POST` | `/contacto` | Público | Enviar una consulta del sitio empresarial al administrador |
 | `POST` | `/auth/login` | Público | Iniciar sesión y obtener `access_token` y `usuario` |
 | `GET` | `/auth/profile` | Usuario autenticado | Obtener el perfil propio |
 | `PATCH` | `/auth/profile` | Usuario autenticado | Actualizar datos propios y el establecimiento asociado si existe |
@@ -356,7 +365,7 @@ Para ejecutar las pruebas e2e contra PostgreSQL en un esquema temporal aislado, 
 
 ## Alcance pendiente
 
-El backend todavía no define entidades, tablas ni endpoints para reportes adicionales, notificaciones, actividades o estadísticas del dashboard. Tampoco incluye búsquedas por distancia, PostGIS, IA, embeddings ni reconocimiento CNN. Las mascotas propias, sus fotografías y las alertas de extravío ya están implementadas; los clientes pueden consumir los endpoints documentados.
+El backend todavía no define entidades, tablas ni endpoints para reportes adicionales, notificaciones, actividades o estadísticas del dashboard. Tampoco incluye búsquedas por distancia, PostGIS, entrenamiento propio, Bedrock ni suscripciones. La búsqueda visual de avistamientos utiliza el servicio ONNX y la caché de vectores descritos al final de este documento. Las mascotas propias, sus fotografías y las alertas de extravío ya están implementadas; los clientes pueden consumir los endpoints documentados.
 
 Los mapas vectoriales de MapLibre y OpenFreeMap se configuran en el frontend. Este backend almacena la dirección y las coordenadas del establecimiento, pero no sirve mapas ni mosaicos.
 
@@ -365,7 +374,7 @@ Los mapas vectoriales de MapLibre y OpenFreeMap se configuran en el frontend. Es
 
 Dos tablas nuevas mediante `1794945600000-AvistamientosSchema.ts`: `avistamiento` y `avistamiento_foto`. Un usuario tiene muchos reportes; una especie tiene muchos avistamientos; un reporte tiene de una a cinco fotos. No exige mascota ni alerta identificada. El reporte guarda descripcion, direccion, fecha_avistamiento, latitud, longitud y estado (ACTIVO, CERRADO, CANCELADO), ademas de propietario y fechas. Las fotos guardan URL, storage_key unico, proveedor, es_principal y fecha. Las respuestas publicas omiten propietario y claves de almacenamiento.
 
-Nueve endpoints nuevos bajo `/api/v1/avistamientos`, descritos en [contrato de avistamientos](specs/avistamientos/design.md) y [documentacion HTTP](docs/README.md). Los reportes activos son publicos; el historial y las modificaciones requieren JWT del autor. No hay privilegio global de ADMIN en este modulo. Solo ACTIVO permite editar/fotos/cerrar/cancelar. Cerrar no confirma identidad ni rescate. IA y coincidencias permanecen pendientes.
+Nueve endpoints bajo `/api/v1/avistamientos`, descritos en [contrato de avistamientos](specs/avistamientos/design.md) y [documentacion HTTP](docs/README.md). Los reportes activos son publicos; el historial y las modificaciones requieren JWT del autor. No hay privilegio global de ADMIN en este modulo. Solo ACTIVO permite editar/fotos/cerrar/cancelar. Cerrar no confirma identidad ni rescate. La consulta por similitud se implementa por separado en `busqueda-visual`.
 
 
 ## Resguardo institucional y adopciones
@@ -381,3 +390,11 @@ Migración `1794956400000-RegistroAdopcionSchema.ts`: añade la tabla `adopcion`
 ## Chat privado
 
 El modulo chat ofrece endpoints JWT bajo `/api/v1/chat/conversaciones` y avisos Socket.IO autenticados en namespace `/chat`. Mensajes persistentes, historial paginado, idempotencia por UUID y pendientes de lectura. Las salas y destinatarios se deducen en el servidor. Reutiliza la migracion ChatSchema1794960000000; no cambia env. Instalar dependencias y reiniciar backend. [Contrato HTTP y tiempo real](docs/chat.md).
+
+## Analítica
+
+`GET /api/v1/analitica/mapa-calor`: ADMIN y ENCARGADO consultan puntos agrupados de alertas o avistamientos, con filtros de estado y fechas del evento en horario de Bolivia. Excluye alertas ocultas y registros desactivados. Devuelve GeoJSON aproximado y cantidades, sin datos personales. Reutiliza las tablas existentes; no requiere migraciones, paquetes ni variables adicionales. [Contrato y ejemplos](docs/analitica.md).
+
+## Búsqueda visual
+
+`POST /api/v1/busqueda-visual/avistamientos`: multipart con `especieId` y 1–5 `fotos`, exclusivo de CIUDADANO. Usa `IA_SERVICE_URL`/`IA_SERVICE_TOKEN` para consultar el servicio Python. La migración `1795046400000-BusquedaVisualSchema.ts` añade `avistamiento_embedding` para guardar vectores por foto y versión del modelo. Devuelve hasta cinco candidatos de avistamientos activos, sin confirmar identidad. [Contrato y ejecución](docs/busqueda-visual.md). No incluye Bedrock ni suscripciones; reemplaza el carácter pendiente de la búsqueda visual mencionado en las secciones anteriores.

@@ -2,6 +2,8 @@
 
 Base URL local: `http://localhost:3000/api/v1`
 
+El formulario del sitio empresarial está documentado en [Contacto empresarial](contacto.md). Su endpoint público envía consultas mediante Brevo sin abrir una aplicación de correo.
+
 El módulo de alertas de extravío está documentado en [Alertas de extravío: HTTP y Postman](alertas-extravio.md). Incluye siete endpoints, listado público, historial propio y cierre de alertas; la colección contiene la carpeta **Alertas de extravío**.
 
 El módulo de mascotas y especies está documentado en [Mascotas: HTTP y Postman](mascotas.md), con los ocho endpoints, formularios multipart, edición JSON, permisos por propietario y recuperación de fallos de Cloudinary. La colección Postman incluye la carpeta **Mascotas y especies**.
@@ -13,6 +15,8 @@ Para importar en Postman: **Import** → selecciona [smartpet_api.postman_collec
 
 ## Módulo: `Auth`
 
+El registro exige aceptar ambos documentos. Consulta el [contrato de aceptación legal](legal.md). Los clientes anteriores deben incluir los tres campos nuevos; el inicio de sesión no cambia.
+
 ### 1A. Registro de Ciudadano — `POST /auth/register`
 - **Acceso:** Público
 - **Body (`application/json`):**
@@ -22,6 +26,9 @@ Para importar en Postman: **Import** → selecciona [smartpet_api.postman_collec
   "apellido": "Pérez",
   "email": "ana@ejemplo.com",
   "password": "MiPassword123",
+  "aceptaTerminos": true,
+  "aceptaPrivacidad": true,
+  "versionLegal": "2026-11-18.1",
   "telefono": "70012345",                   // Opcional (máx. 20 caracteres)
   "fotoUrl": "https://ejemplo.com/foto.jpg" // Opcional
 }
@@ -37,6 +44,9 @@ Para importar en Postman: **Import** → selecciona [smartpet_api.postman_collec
   "apellido": "Gómez",
   "email": "carlos@veterinaria.com",
   "password": "MiPassword123",
+  "aceptaTerminos": true,
+  "aceptaPrivacidad": true,
+  "versionLegal": "2026-11-18.1",
   "telefono": "71122334",                         // Opcional (máx. 20 caracteres)
   "fotoUrl": "https://ejemplo.com/encargado.jpg", // Opcional
   "establecimiento": {                            // Opcional (si se incluye, asigna rol ENCARGADO)
@@ -194,3 +204,11 @@ Los tres roles gestionan solamente reportes propios. Fechas no futuras, punto ob
 ## Chat privado
 
 [HTTP, Socket.IO y recuperacion del historial](chat.md). Postman incluye la carpeta Chat privado.
+
+## Analítica
+
+[Mapa de calor de alertas y avistamientos](analitica.md). Consulta exclusiva de ADMIN y ENCARGADO, sin nuevas tablas. Postman incluye la carpeta Analítica.
+
+## Búsqueda visual
+
+[Consulta por fotografías de perros y gatos](busqueda-visual.md). Ciudadanos autenticados consultan posibles coincidencias entre avistamientos activos. Requiere servicio Python interno y migración de caché de vectores.
