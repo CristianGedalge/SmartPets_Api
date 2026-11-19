@@ -24,6 +24,7 @@ import {
 } from '../almacenamiento/image-upload';
 import { LimpiezaArchivosService } from '../almacenamiento/limpieza-archivos.service';
 import { Especie } from '../especies/entities/especie.entity';
+import { RolNombre } from '../roles/entities/rol.entity';
 import { CreateMascotaDto } from './dto/create-mascota.dto';
 import { UpdateMascotaDto } from './dto/update-mascota.dto';
 import { Mascota } from './entities/mascota.entity';
@@ -71,6 +72,16 @@ export class MascotasService {
     return this.findOne(usuarioId, id);
   }
 
+  async findAllAdmin(pagination: PaginationDto = {}) {
+    const mascotas = await this.mascotas.find({
+      relations: { especie: true, fotos: true, usuario: true },
+      take: pagination.limit ?? 10,
+      skip: pagination.offset ?? 0,
+      order: { createdAt: 'DESC', id: 'ASC' },
+    });
+    return mascotas.map((mascota) => this.publicAdminPet(mascota));
+  }
+
   async findAll(usuarioId: string, pagination: PaginationDto = {}) {
     const mascotas = await this.mascotas.find({
       where: { usuarioId, estado: true },
@@ -82,7 +93,16 @@ export class MascotasService {
     return mascotas.map((mascota) => this.publicPet(mascota));
   }
 
-  async findOne(usuarioId: string, id: string) {
+  async findOne(usuarioId: string, id: string, rol?: RolNombre) {
+    if (rol === RolNombre.ADMIN) {
+      const mascota = await this.mascotas.findOne({
+        where: { id },
+        relations: { especie: true, fotos: true, usuario: true },
+      });
+      if (!mascota) throw new NotFoundException('Mascota no encontrada.');
+      return this.publicAdminPet(mascota);
+    }
+
     const mascota = await this.mascotas.findOne({
       where: { id, usuarioId, estado: true },
       relations: { especie: true, fotos: true },
@@ -91,18 +111,41 @@ export class MascotasService {
     return this.publicPet(mascota);
   }
 
-  async update(usuarioId: string, id: string, dto: UpdateMascotaDto) {
+  async update(
+    usuarioId: string,
+    id: string,
+    dto: UpdateMascotaDto,
+    rol?: RolNombre,
+  ) {
+    if (rol === RolNombre.ADMIN) {
+      await this.findOne(usuarioId, id, rol);
+      if (dto.especieId !== undefined) await this.assertSpecies(dto.especieId);
+      const mascota = await this.mascotas.preload({ id, ...dto });
+      if (!mascota) throw new NotFoundException('Mascota no encontrada.');
+      await this.mascotas.save(mascota);
+      return this.findOne(usuarioId, id, rol);
+    }
+
+    const { estado: _ignoredEstado, ...ownerDto } = dto;
     // Verify ownership before species lookup, so foreign resource details are not exposed.
     await this.findOne(usuarioId, id);
-    if (dto.especieId !== undefined) await this.assertSpecies(dto.especieId);
+    if (ownerDto.especieId !== undefined)
+      await this.assertSpecies(ownerDto.especieId);
     await this.dataSource.transaction(async (manager) => {
       const mascota = await this.ownedForUpdate(manager, usuarioId, id);
-      await manager.save(Mascota, { ...mascota, ...dto });
+      await manager.save(Mascota, { ...mascota, ...ownerDto });
     });
     return this.findOne(usuarioId, id);
   }
 
-  async remove(usuarioId: string, id: string) {
+  async remove(usuarioId: string, id: string, rol?: RolNombre) {
+    if (rol === RolNombre.ADMIN) {
+      const mascota = await this.mascotas.preload({ id, estado: false });
+      if (!mascota) throw new NotFoundException('Mascota no encontrada.');
+      await this.mascotas.save(mascota);
+      return this.findOne(usuarioId, id, rol);
+    }
+
     return this.dataSource.transaction(async (manager) => {
       const mascota = await this.ownedForUpdate(manager, usuarioId, id);
       mascota.estado = false;
@@ -177,6 +220,18 @@ export class MascotasService {
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() ||
           a.id.localeCompare(b.id),
       ),
+    };
+  }
+
+  private publicAdminPet(mascota: Mascota) {
+    const base = this.publicPet(mascota);
+    if (!mascota.usuario) {
+      return { ...base, usuario: null };
+    }
+    const { passwordHash, ...usuarioPublico } = mascota.usuario;
+    return {
+      ...base,
+      usuario: usuarioPublico,
     };
   }
 

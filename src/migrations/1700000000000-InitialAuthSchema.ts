@@ -42,15 +42,15 @@ export class InitialAuthSchema1700000000000 implements MigrationInterface {
       )
     `);
 
-    const adminPasswordHash = await bcrypt.hash('Admin12345', 10);
+    const adminPasswordHash = await bcrypt.hash('12345678', 10);
     await queryRunner.query(
       `
       INSERT INTO "usuario" ("rol_id", "nombre", "apellido", "email", "password_hash", "estado")
       VALUES (
         (SELECT "id" FROM "rol" WHERE "nombre" = 'ADMIN'),
-        'Admin',
-        'SmartPet',
-        'admin@smartpet.com',
+        'Cristian',
+        'Gedalge',
+        'cristian.gedalge2018@gmail.com',
         $1,
         true
       )

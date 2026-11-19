@@ -41,6 +41,12 @@ export class MascotasController {
     return this.mascotas.create(usuarioId, dto, files);
   }
 
+  @Get()
+  @AuthRole(RolNombre.ADMIN)
+  findAllAdmin(@Query() pagination: PaginationDto) {
+    return this.mascotas.findAllAdmin(pagination);
+  }
+
   @Get('mis-mascotas')
   findAll(
     @GetUser('sub') usuarioId: string,
@@ -52,26 +58,29 @@ export class MascotasController {
   @Get(':id')
   findOne(
     @GetUser('sub') usuarioId: string,
+    @GetUser('rol') rol: RolNombre,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.mascotas.findOne(usuarioId, id);
+    return this.mascotas.findOne(usuarioId, id, rol);
   }
 
   @Patch(':id')
   update(
     @GetUser('sub') usuarioId: string,
+    @GetUser('rol') rol: RolNombre,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateMascotaDto,
   ) {
-    return this.mascotas.update(usuarioId, id, dto);
+    return this.mascotas.update(usuarioId, id, dto, rol);
   }
 
   @Delete(':id')
   remove(
     @GetUser('sub') usuarioId: string,
+    @GetUser('rol') rol: RolNombre,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.mascotas.remove(usuarioId, id);
+    return this.mascotas.remove(usuarioId, id, rol);
   }
 
   @Post(':id/fotos')
