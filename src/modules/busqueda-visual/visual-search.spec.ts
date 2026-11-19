@@ -8,7 +8,7 @@ import {
   VISUAL_MODEL,
 } from './visual-model.client';
 import { SightingPhotoClient } from './sighting-photo.client';
-import { similarityScore } from './ranking';
+import { hasSufficientSimilarity, similarityScore } from './ranking';
 
 describe('Visual model boundary', () => {
   const originalFetch = global.fetch;
@@ -23,6 +23,12 @@ describe('Visual model boundary', () => {
     expect(
       similarityScore([vector(0), vector(1)], [vector(0), vector(1)]),
     ).toBe(1);
+  });
+  it('rechaza candidatos por debajo del mínimo configurado', () => {
+    expect(hasSufficientSimilarity(0.59, 0.6)).toBe(false);
+    expect(hasSufficientSimilarity(0.6, 0.6)).toBe(true);
+    expect(hasSufficientSimilarity(0.9, 0.6)).toBe(true);
+    expect(hasSufficientSimilarity(Number.NaN, 0.6)).toBe(false);
   });
   it('rechaza vectores nulos, incorrectos o no finitos', () => {
     for (const value of [

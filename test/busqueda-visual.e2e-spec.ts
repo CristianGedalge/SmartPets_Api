@@ -302,7 +302,7 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
 
   it('ordena coincidencias por reporte, reutiliza caché y no devuelve datos privados', async () => {
     const first = await sight();
-    const second = await sight();
+    await sight();
     download.mockImplementation((url) =>
       Promise.resolve(url.includes(first.report.id) ? photoA : photoB),
     );
@@ -310,9 +310,8 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
     expect(body.modelo).toBe(VISUAL_MODEL);
     expect(body.resultados.map((item) => item.avistamiento.id)).toEqual([
       first.report.id,
-      second.report.id,
     ]);
-    expect(body.resultados.map((item) => item.similitud)).toEqual([1, 0]);
+    expect(body.resultados.map((item) => item.similitud)).toEqual([1]);
     expect(JSON.stringify(body)).not.toMatch(
       /storageKey|private\/|usuarioId|password|vector|email|telefono/,
     );
@@ -341,6 +340,9 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
 
   it('acepta varias consultas, agrupa fotos de un mismo avistamiento y limita a cinco resultados', async () => {
     for (let i = 0; i < 6; i++) await sight();
+    embed.mockImplementation((images) =>
+      Promise.resolve(images.map(() => vector(0))),
+    );
     const body = (await search().attach('fotos', photoB, 'b.png').expect(201))
       .body as SearchResult;
     expect(body.fotosConsultadas).toBe(2);
@@ -348,7 +350,7 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
     expect(
       new Set(body.resultados.map((item) => item.avistamiento.id)).size,
     ).toBe(5);
-    expect(body.resultados[0].similitud).toBe(0.5);
+    expect(body.resultados[0].similitud).toBe(1);
   });
 
   it('devuelve vacío real y expone fallas parciales sin inventar coincidencias', async () => {
@@ -365,6 +367,15 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
     const body = (await search().expect(201)).body as SearchResult;
     expect(body.resultados).toHaveLength(1);
     expect(body.fotosNoProcesadas).toBe(1);
+  });
+
+  it('no devuelve el candidato más cercano si no alcanza la similitud mínima', async () => {
+    await sight();
+    download.mockResolvedValue(photoB);
+
+    const body = (await search(photoA).expect(201)).body as SearchResult;
+
+    expect(body.resultados).toEqual([]);
   });
 
   it('revalida visibilidad si un reporte se cierra durante la inferencia', async () => {

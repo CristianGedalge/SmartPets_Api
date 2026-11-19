@@ -1,10 +1,12 @@
 import {
   BadRequestException,
   HttpException,
+  Inject,
   Injectable,
   ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, QueryFailedError, Repository } from 'typeorm';
 import {
@@ -22,11 +24,12 @@ import {
   VISUAL_MODEL,
   VisualModelClient,
 } from './visual-model.client';
-import { similarityScore } from './ranking';
+import { hasSufficientSimilarity, similarityScore } from './ranking';
 import { SuscripcionesService } from '../suscripciones/suscripciones.service';
+import { iaConfig } from '../../config';
 
 const NOTICE =
-  'Posibles coincidencias visuales, no identidad confirmada. El orden no representa una probabilidad. Revisa las fotos, la fecha y la ubicación.';
+  'Posibles coincidencias visuales, no identidad confirmada. Solo se muestran animales con parecido suficiente; revisa las fotos, la fecha y la ubicación.';
 
 @Injectable()
 export class BusquedaVisualService {
@@ -42,6 +45,8 @@ export class BusquedaVisualService {
     private readonly model: VisualModelClient,
     private readonly remote: SightingPhotoClient,
     private readonly suscripciones: SuscripcionesService,
+    @Inject(iaConfig.KEY)
+    private readonly ia: ConfigType<typeof iaConfig>,
   ) {}
 
   async buscar(
@@ -177,6 +182,9 @@ export class BusquedaVisualService {
             },
           ];
         })
+        .filter((item) =>
+          hasSufficientSimilarity(item.similitud, this.ia.minSimilarity),
+        )
         .sort(
           (a, b) =>
             b.similitud - a.similitud ||

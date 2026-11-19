@@ -24,3 +24,10 @@ export function similarityScore(
     ) / queries.length
   );
 }
+
+export function hasSufficientSimilarity(
+  score: number,
+  minimum: number,
+): boolean {
+  return Number.isFinite(score) && score >= minimum;
+}
