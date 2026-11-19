@@ -4,3 +4,4 @@ export { cloudinaryConfig } from './cloudinary.config';
 export { iaConfig } from './ia.config';
 export { contactConfig } from './contact.config';
 export { bedrockConfig } from './bedrock.config';
+export { firebaseConfig } from './firebase.config';
