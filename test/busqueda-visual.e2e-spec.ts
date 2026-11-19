@@ -30,6 +30,14 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { cloudinaryConfig, databaseConfig, jwtConfig } from '../src/config';
 import { Usuario } from '../src/modules/usuarios/entities/usuario.entity';
+import { Consumo } from '../src/modules/suscripciones/entities/consumo.entity';
+import { Pago } from '../src/modules/suscripciones/entities/pago.entity';
+import { Plan } from '../src/modules/suscripciones/entities/plan.entity';
+import {
+  EstadoSuscripcion,
+  Suscripcion,
+} from '../src/modules/suscripciones/entities/suscripcion.entity';
+import { SuscripcionesSchema1795060000000 } from '../src/migrations/1795060000000-SuscripcionesSchema';
 import { Rol, RolNombre } from '../src/modules/roles/entities/rol.entity';
 import { Establecimiento } from '../src/modules/establecimientos/entities/establecimiento.entity';
 import { Especie } from '../src/modules/especies/entities/especie.entity';
@@ -84,6 +92,10 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
         AvistamientoEmbedding,
         Rol,
         Usuario,
+        Plan,
+        Suscripcion,
+        Consumo,
+        Pago,
         Establecimiento,
         Especie,
         Mascota,
@@ -121,6 +133,7 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
       await installInstitutionSchema(runner);
       await new ChatSchema1794960000000().up(runner);
       await new BusquedaVisualSchema1795046400000().up(runner);
+      await new SuscripcionesSchema1795060000000().up(runner);
       await runner.commitTransaction();
     } catch (error) {
       await runner.rollbackTransaction();
@@ -143,6 +156,15 @@ integration('Busqueda visual HTTP + PostgreSQL', () => {
         estado: true,
       });
     }
+    const gratis = await db
+      .getRepository(Plan)
+      .findOneByOrFail({ nombre: 'Gratis' });
+    await db.getRepository(Suscripcion).save({
+      usuarioId: users[3],
+      planId: gratis.id,
+      estado: EstadoSuscripcion.ACTIVA,
+      inicio: new Date(),
+    });
     const module = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(DataSource)
       .useValue(db)

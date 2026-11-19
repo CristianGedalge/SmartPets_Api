@@ -27,6 +27,7 @@ Esta documentación describe las entidades, migraciones y controladores presente
 | --- | --- |
 | `auth` | Registrar ciudadanos o encargados, iniciar sesión, emitir JWT y consultar/actualizar el perfil propio |
 | `contacto` | Recibir consultas públicas del sitio empresarial y enviarlas al correo administrativo mediante Brevo |
+| `agente` | Responder consultas de ciudadanos mediante Amazon Bedrock sin exponer credenciales al móvil |
 | `roles` | Permitir al administrador consultar los roles disponibles |
 | `usuarios` | Listar, consultar, editar y desactivar usuarios; acceso exclusivo de administrador |
 | `establecimientos` | Listar, consultar, editar y desactivar veterinarias o refugios; acceso exclusivo de administrador |
@@ -229,6 +230,7 @@ Prefijo global: `/api/v1`. URL local por defecto: `http://localhost:3000/api/v1`
 | --- | --- | --- | --- |
 | `POST` | `/auth/register` | Público | Registrar ciudadano o encargado con establecimiento |
 | `POST` | `/contacto` | Público | Enviar una consulta del sitio empresarial al administrador |
+| `POST` | `/agente/chat` | `CIUDADANO` | Consultar al Agente SmartPet mediante Bedrock |
 | `POST` | `/auth/login` | Público | Iniciar sesión y obtener `access_token` y `usuario` |
 | `GET` | `/auth/profile` | Usuario autenticado | Obtener el perfil propio |
 | `PATCH` | `/auth/profile` | Usuario autenticado | Actualizar datos propios y el establecimiento asociado si existe |

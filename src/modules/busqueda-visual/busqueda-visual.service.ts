@@ -23,6 +23,7 @@ import {
   VisualModelClient,
 } from './visual-model.client';
 import { similarityScore } from './ranking';
+import { SuscripcionesService } from '../suscripciones/suscripciones.service';
 
 const NOTICE =
   'Posibles coincidencias visuales, no identidad confirmada. El orden no representa una probabilidad. Revisa las fotos, la fecha y la ubicación.';
@@ -40,6 +41,7 @@ export class BusquedaVisualService {
     private readonly sightings: Repository<Avistamiento>,
     private readonly model: VisualModelClient,
     private readonly remote: SightingPhotoClient,
+    private readonly suscripciones: SuscripcionesService,
   ) {}
 
   async buscar(
@@ -48,6 +50,7 @@ export class BusquedaVisualService {
     files?: ImageUpload[],
   ) {
     validatePhotos(files);
+    await this.suscripciones.verificar(user, 'busqueda');
     if (this.activeUsers.has(user) || this.activeUsers.size >= 2)
       throw new HttpException(
         'Hay una búsqueda en curso. Espera unos instantes y vuelve a intentar.',
@@ -180,6 +183,7 @@ export class BusquedaVisualService {
             a.avistamiento.id.localeCompare(b.avistamiento.id),
         )
         .slice(0, 5);
+      await this.suscripciones.consumir(user, 'busqueda');
       return {
         modelo: VISUAL_MODEL,
         aviso: NOTICE,

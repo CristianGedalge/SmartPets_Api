@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
+import { SuscripcionesModule } from '../suscripciones/suscripciones.module';
 import { FotoAvistamiento } from '../avistamientos/entities/foto-avistamiento.entity';
 import { Especie } from '../especies/entities/especie.entity';
 import { Avistamiento } from '../avistamientos/entities/avistamiento.entity';
@@ -13,6 +14,7 @@ import { VisualModelClient } from './visual-model.client';
 @Module({
   imports: [
     AuthModule,
+    SuscripcionesModule,
     TypeOrmModule.forFeature([
       FotoAvistamiento,
       AvistamientoEmbedding,

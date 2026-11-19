@@ -6,6 +6,7 @@ import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { jwtConfig } from '../../config';
 import { EstablecimientosModule } from '../establecimientos/establecimientos.module';
+import { SuscripcionesModule } from '../suscripciones/suscripciones.module';
 import { RolesModule } from '../roles/roles.module';
 import { UsuariosModule } from '../usuarios/usuarios.module';
 import { AuthController } from './auth.controller';
@@ -19,6 +20,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     RolesModule,
     UsuariosModule,
     EstablecimientosModule,
+    SuscripcionesModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [jwtConfig.KEY],

@@ -2,6 +2,8 @@
 
 Base URL local: `http://localhost:3000/api/v1`
 
+El chat del ciudadano con el asistente está documentado en [Agente SmartPet](agente.md). El backend protege la clave de Bedrock y no persiste el historial.
+
 El formulario del sitio empresarial está documentado en [Contacto empresarial](contacto.md). Su endpoint público envía consultas mediante Brevo sin abrir una aplicación de correo.
 
 El módulo de alertas de extravío está documentado en [Alertas de extravío: HTTP y Postman](alertas-extravio.md). Incluye siete endpoints, listado público, historial propio y cierre de alertas; la colección contiene la carpeta **Alertas de extravío**.

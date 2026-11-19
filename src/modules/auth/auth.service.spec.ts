@@ -11,6 +11,7 @@ import {
 } from '../establecimientos/entities/establecimiento.entity';
 import { Rol, RolNombre } from '../roles/entities/rol.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
+import { SuscripcionesService } from '../suscripciones/suscripciones.service';
 import { AuthService } from './auth.service';
 
 jest.mock('bcrypt', () => ({
@@ -47,6 +48,11 @@ describe('AuthService', () => {
     signAsync: jest.fn(),
   };
 
+  const mockSuscripciones = {
+    asignarGratis: jest.fn(),
+    resumen: jest.fn().mockResolvedValue(null),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -57,6 +63,7 @@ describe('AuthService', () => {
         { provide: getRepositoryToken(Rol), useValue: mockRolRepo },
         { provide: DataSource, useValue: mockDataSource },
         { provide: JwtService, useValue: mockJwtService },
+        { provide: SuscripcionesService, useValue: mockSuscripciones },
       ],
     }).compile();
 
@@ -119,6 +126,7 @@ describe('AuthService', () => {
           rol: RolNombre.CIUDADANO,
           estado: true,
           establecimiento: null,
+          suscripcion: null,
         },
       });
       expect(result.usuario).not.toHaveProperty('passwordHash');
@@ -204,6 +212,7 @@ describe('AuthService', () => {
           rol: RolNombre.ENCARGADO,
           estado: true,
           establecimiento: savedEstablecimiento,
+          suscripcion: null,
         },
       });
     });
@@ -322,6 +331,7 @@ describe('AuthService', () => {
         rol: RolNombre.CIUDADANO,
         estado: true,
         establecimiento: null,
+        suscripcion: null,
       });
     });
 

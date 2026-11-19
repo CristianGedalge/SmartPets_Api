@@ -4,6 +4,8 @@ import { ChatModule } from './modules/chat/chat.module';
 import { AnaliticaModule } from './modules/analitica/analitica.module';
 import { BusquedaVisualModule } from './modules/busqueda-visual/busqueda-visual.module';
 import { ContactoModule } from './modules/contacto/contacto.module';
+import { AgenteModule } from './modules/agente/agente.module';
+import { SuscripcionesModule } from './modules/suscripciones/suscripciones.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
@@ -15,6 +17,7 @@ import {
   jwtConfig,
   iaConfig,
   contactConfig,
+  bedrockConfig,
 } from './config';
 import { AuthModule } from './modules/auth/auth.module';
 import { RolesModule } from './modules/roles/roles.module';
@@ -35,6 +38,7 @@ import { AlertasExtravioModule } from './modules/alertas-extravio/alertas-extrav
         cloudinaryConfig,
         iaConfig,
         contactConfig,
+        bedrockConfig,
       ],
     }),
     TypeOrmModule.forRootAsync({
@@ -64,6 +68,8 @@ import { AlertasExtravioModule } from './modules/alertas-extravio/alertas-extrav
     AnaliticaModule,
     BusquedaVisualModule,
     ContactoModule,
+    AgenteModule,
+    SuscripcionesModule,
   ],
   controllers: [],
   providers: [

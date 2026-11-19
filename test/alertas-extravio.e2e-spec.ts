@@ -15,6 +15,10 @@ import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { cloudinaryConfig, databaseConfig, jwtConfig } from '../src/config';
 import { Usuario } from '../src/modules/usuarios/entities/usuario.entity';
+import { Consumo } from '../src/modules/suscripciones/entities/consumo.entity';
+import { Pago } from '../src/modules/suscripciones/entities/pago.entity';
+import { Plan } from '../src/modules/suscripciones/entities/plan.entity';
+import { Suscripcion } from '../src/modules/suscripciones/entities/suscripcion.entity';
 import { Rol, RolNombre } from '../src/modules/roles/entities/rol.entity';
 import { Establecimiento } from '../src/modules/establecimientos/entities/establecimiento.entity';
 import { Especie } from '../src/modules/especies/entities/especie.entity';
@@ -113,6 +117,10 @@ integration('Alertas extravio HTTP + JWT + PostgreSQL', () => {
       entities: [
         Rol,
         Usuario,
+        Plan,
+        Suscripcion,
+        Consumo,
+        Pago,
         Establecimiento,
         Especie,
         Mascota,

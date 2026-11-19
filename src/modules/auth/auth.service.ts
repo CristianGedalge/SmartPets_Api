@@ -18,6 +18,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { AceptacionLegal } from './entities/aceptacion-legal.entity';
 import { LEGAL_VERSION } from './legal/legal-version';
+import { SuscripcionesService } from '../suscripciones/suscripciones.service';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     private readonly rolRepo: Repository<Rol>,
     private readonly dataSource: DataSource,
     private readonly jwtService: JwtService,
+    private readonly suscripciones: SuscripcionesService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -97,6 +99,9 @@ export class AuthService {
           versionTerminos: versionLegal,
           versionPrivacidad: versionLegal,
         });
+        if (rolNombre === RolNombre.CIUDADANO) {
+          await this.suscripciones.asignarGratis(manager, savedUsuario.id);
+        }
 
         return { usuario: savedUsuario, establecimiento: savedEstablecimiento };
       },
@@ -116,6 +121,7 @@ export class AuthService {
         ...usuarioPublico,
         rol: rol.nombre,
         establecimiento,
+        suscripcion: await this.suscripciones.resumen(usuario.id),
       },
     };
   }
@@ -152,6 +158,7 @@ export class AuthService {
         ...usuarioPublico,
         rol: usuario.rol.nombre,
         establecimiento: usuario.establecimiento ?? null,
+        suscripcion: await this.suscripciones.resumen(usuario.id),
       },
     };
   }
@@ -172,6 +179,7 @@ export class AuthService {
       ...usuarioPublico,
       rol: usuario.rol.nombre,
       establecimiento: usuario.establecimiento ?? null,
+      suscripcion: await this.suscripciones.resumen(usuario.id),
     };
   }
 

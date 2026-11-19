@@ -2,6 +2,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
@@ -27,6 +28,7 @@ const escapeHtml = (value: string) =>
 
 @Injectable()
 export class ContactoService {
+  private readonly logger = new Logger(ContactoService.name);
   private readonly attempts = new Map<string, number[]>();
 
   constructor(
@@ -48,6 +50,8 @@ export class ContactoService {
 
     const response = await this.requestBrevo(dto);
     if (!response.ok) {
+      const detail = await response.text();
+      this.logger.error(`Brevo respondió ${response.status}: ${detail.slice(0, 300)}`);
       throw new ServiceUnavailableException(
         'No se pudo enviar el mensaje. Inténtalo nuevamente más tarde.',
       );
@@ -72,12 +76,16 @@ export class ContactoService {
           to: [{ email: this.config.recipientEmail }],
           replyTo: { email: dto.email, name: dto.nombre },
           subject: `[SmartPet] ${dto.asunto}`,
-          textContent: `Nombre: ${dto.nombre}\nCorreo: ${dto.email}\n\n${dto.mensaje}`,
-          htmlContent: `<h2>Nueva consulta desde SmartPet</h2><p><strong>Nombre:</strong> ${escapeHtml(dto.nombre)}</p><p><strong>Correo:</strong> ${escapeHtml(dto.email)}</p><p><strong>Asunto:</strong> ${escapeHtml(dto.asunto)}</p><p>${escapeHtml(dto.mensaje).replaceAll('\n', '<br>')}</p>`,
+          textContent: dto.mensaje,
+          htmlContent: `<p>${escapeHtml(dto.mensaje).replaceAll('\n', '<br>')}</p>`,
         }),
         signal: AbortSignal.timeout(10000),
       });
-    } catch {
+    } catch (error) {
+      if (error instanceof ServiceUnavailableException) throw error;
+      this.logger.error(
+        `No se pudo contactar a Brevo: ${error instanceof Error ? error.message : 'error desconocido'}`,
+      );
       throw new ServiceUnavailableException(
         'No se pudo enviar el mensaje. Inténtalo nuevamente más tarde.',
       );
