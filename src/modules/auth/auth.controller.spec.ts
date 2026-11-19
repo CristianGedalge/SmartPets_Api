@@ -1,3 +1,4 @@
+import { LEGAL_VERSION } from './legal/legal-version';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -29,6 +30,9 @@ describe('AuthController', () => {
       apellido: 'Pérez',
       email: 'ana@ejemplo.com',
       password: 'MiPassword123',
+      aceptaTerminos: true,
+      aceptaPrivacidad: true,
+      versionLegal: LEGAL_VERSION,
     };
     const expected = { access_token: 'jwt', usuario: { id: 'uuid' } };
     mockAuthService.register.mockResolvedValue(expected);

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -15,6 +16,8 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { AceptacionLegal } from './entities/aceptacion-legal.entity';
+import { LEGAL_VERSION } from './legal/legal-version';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +31,19 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
+    if (
+      registerDto.aceptaTerminos !== true ||
+      registerDto.aceptaPrivacidad !== true ||
+      registerDto.versionLegal !== LEGAL_VERSION
+    ) {
+      throw new BadRequestException(
+        'Debes aceptar los términos y la política de privacidad vigentes para registrarte.',
+      );
+    }
     const {
+      aceptaTerminos,
+      aceptaPrivacidad,
+      versionLegal,
       password,
       establecimiento: establecimientoDto,
       ...usuarioData
@@ -76,6 +91,12 @@ export class AuthService {
             newEstablecimiento,
           );
         }
+
+        await manager.insert(AceptacionLegal, {
+          usuarioId: savedUsuario.id,
+          versionTerminos: versionLegal,
+          versionPrivacidad: versionLegal,
+        });
 
         return { usuario: savedUsuario, establecimiento: savedEstablecimiento };
       },

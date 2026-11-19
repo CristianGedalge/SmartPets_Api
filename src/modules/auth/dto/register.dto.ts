@@ -1,5 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import {
+  Equals,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -11,6 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { TipoEstablecimiento } from '../../establecimientos/entities/establecimiento.entity';
+import { LEGAL_VERSION } from '../legal/legal-version';
 
 export class RegisterEstablecimientoDto {
   @Transform(({ value }: { value: unknown }) =>
@@ -65,6 +67,19 @@ export class RegisterEstablecimientoDto {
 }
 
 export class RegisterDto {
+  @Equals(true, { message: 'Debes aceptar los términos y condiciones.' })
+  aceptaTerminos: boolean;
+
+  @Equals(true, { message: 'Debes aceptar la política de privacidad.' })
+  aceptaPrivacidad: boolean;
+
+  @IsString()
+  @Equals(LEGAL_VERSION, {
+    message:
+      'Revisa la versión vigente de los términos y la política de privacidad.',
+  })
+  versionLegal: string;
+
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim() : value,
   )

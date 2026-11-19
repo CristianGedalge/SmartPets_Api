@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AceptacionLegal } from './entities/aceptacion-legal.entity';
 import type { ConfigType } from '@nestjs/config';
 import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -13,6 +15,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([AceptacionLegal]),
     RolesModule,
     UsuariosModule,
     EstablecimientosModule,

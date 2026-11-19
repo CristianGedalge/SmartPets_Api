@@ -1,3 +1,4 @@
+import { LEGAL_VERSION } from './legal/legal-version';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -33,6 +34,7 @@ describe('AuthService', () => {
     preload: jest.fn(),
     findOne: jest.fn(),
     save: jest.fn(),
+    insert: jest.fn().mockResolvedValue({}),
   };
 
   const mockDataSource = {
@@ -87,6 +89,9 @@ describe('AuthService', () => {
       mockJwtService.signAsync.mockResolvedValue('jwt-token');
 
       const result = await service.register({
+        aceptaTerminos: true,
+        aceptaPrivacidad: true,
+        versionLegal: LEGAL_VERSION,
         nombre: 'Ana',
         apellido: 'Pérez',
         email: 'ana@ejemplo.com',
@@ -162,6 +167,9 @@ describe('AuthService', () => {
       mockJwtService.signAsync.mockResolvedValue('jwt-token-enc');
 
       const result = await service.register({
+        aceptaTerminos: true,
+        aceptaPrivacidad: true,
+        versionLegal: LEGAL_VERSION,
         nombre: 'Carlos',
         apellido: 'Gómez',
         email: 'carlos@vet.com',
@@ -208,6 +216,9 @@ describe('AuthService', () => {
 
       await expect(
         service.register({
+          aceptaTerminos: true,
+          aceptaPrivacidad: true,
+          versionLegal: LEGAL_VERSION,
           nombre: 'Ana',
           apellido: 'Pérez',
           email: 'ana@ejemplo.com',
