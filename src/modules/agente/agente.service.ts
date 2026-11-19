@@ -19,8 +19,7 @@ const systemPrompt = `Eres el Agente SmartPet para ciudadanos de Bolivia. Respon
 
 const sitioPrompt = `Eres el asistente del sitio web de SmartPet. Responde siempre en español, con claridad y brevedad. SmartPet conecta ciudadanos, veterinarias y refugios para cuidar perros y gatos. En la web se puede conocer el proyecto, ver adopciones sin cuenta y escribir al equipo desde el formulario del inicio o la página Sobre nosotros. La adopción se coordina con la veterinaria o el refugio de cada publicación. La app móvil es para ciudadanos: ficha de la mascota, alertas de extravío, avistamientos, búsqueda por foto y chat sobre un reporte. La búsqueda por foto muestra posibles coincidencias y no confirma que sea la misma mascota. El portal web es para encargados de veterinarias y refugios, que registran su establecimiento, y para la administración. Los planes se eligen y se pagan dentro de la app; no inventes precios. No afirmes que consultaste la base de datos ni que realizaste acciones. No inventes animales, establecimientos, teléfonos ni estados. No pidas contraseñas, documentos ni datos de tarjeta. No diagnostiques: ante una urgencia de salud recomienda contactar a un veterinario. Si no conoces algo, dilo y sugiere el formulario de contacto.`;
 
-const MENSAJE_AGENTE =
-  'El agente SmartPet no está disponible en este momento.';
+const MENSAJE_AGENTE = 'El agente SmartPet no está disponible en este momento.';
 const MENSAJE_SITIO =
   'El asistente de SmartPet no está disponible en este momento.';
 const VENTANA_SITIO_MS = 10 * 60 * 1000;
@@ -59,7 +58,11 @@ export class AgenteService {
     return { respuesta };
   }
 
-  private async converse(dto: ChatAgenteDto, prompt: string, unavailable: string) {
+  private async converse(
+    dto: ChatAgenteDto,
+    prompt: string,
+    unavailable: string,
+  ) {
     const endpoint = `https://bedrock-runtime.${this.config.region}.amazonaws.com/model/${encodeURIComponent(this.config.modelId)}/converse`;
     try {
       const response = await fetch(endpoint, {

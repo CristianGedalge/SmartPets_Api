@@ -84,8 +84,8 @@ describe('AgenteService', () => {
   it('responde el sitio sin usar el cupo del ciudadano', async () => {
     cupo.verificar.mockClear();
     cupo.consumir.mockClear();
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(
-      async () =>
+    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(() =>
+      Promise.resolve(
         new Response(
           JSON.stringify({
             output: {
@@ -94,31 +94,37 @@ describe('AgenteService', () => {
           }),
           { status: 200 },
         ),
+      ),
     );
     const service = new AgenteService(config, cupo as never);
     await expect(
       service.responderSitio('203.0.113.8', {
-        mensajes: [{ rol: RolMensajeAgente.USUARIO, contenido: '¿Y las adopciones?' }],
+        mensajes: [
+          { rol: RolMensajeAgente.USUARIO, contenido: '¿Y las adopciones?' },
+        ],
       }),
     ).resolves.toEqual({ respuesta: 'Puedes ver Adopciones.' });
     expect(cupo.verificar).not.toHaveBeenCalled();
     expect(cupo.consumir).not.toHaveBeenCalled();
     const request = fetchMock.mock.calls[0][1];
-    const body = JSON.parse(String(request?.body)) as {
+    const body = JSON.parse(
+      typeof request?.body === 'string' ? request.body : '{}',
+    ) as {
       system: Array<{ text: string }>;
     };
     expect(body.system[0].text).toContain('sitio web de SmartPet');
   });
 
   it('limita los mensajes públicos por dirección', async () => {
-    jest.spyOn(global, 'fetch').mockImplementation(
-      async () =>
+    jest.spyOn(global, 'fetch').mockImplementation(() =>
+      Promise.resolve(
         new Response(
           JSON.stringify({
             output: { message: { content: [{ text: 'Hola.' }] } },
           }),
           { status: 200 },
         ),
+      ),
     );
     const service = new AgenteService(config, cupo as never);
     const mensaje = {

@@ -51,7 +51,9 @@ export class ContactoService {
     const response = await this.requestBrevo(dto);
     if (!response.ok) {
       const detail = await response.text();
-      this.logger.error(`Brevo respondió ${response.status}: ${detail.slice(0, 300)}`);
+      this.logger.error(
+        `Brevo respondió ${response.status}: ${detail.slice(0, 300)}`,
+      );
       throw new ServiceUnavailableException(
         'No se pudo enviar el mensaje. Inténtalo nuevamente más tarde.',
       );
