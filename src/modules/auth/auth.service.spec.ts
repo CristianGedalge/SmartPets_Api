@@ -130,6 +130,10 @@ describe('AuthService', () => {
         },
       });
       expect(result.usuario).not.toHaveProperty('passwordHash');
+      expect(mockSuscripciones.asignarGratis).toHaveBeenCalledWith(
+        mockManager,
+        savedUsuario.id,
+      );
     });
 
     it('CA-01b: registra usuario ENCARGADO + establecimiento en transacción cuando se envía establecimiento', async () => {
@@ -215,6 +219,7 @@ describe('AuthService', () => {
           suscripcion: null,
         },
       });
+      expect(mockSuscripciones.asignarGratis).not.toHaveBeenCalled();
     });
 
     it('CA-02: lanza ConflictException (409) si el email ya existe', async () => {

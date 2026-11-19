@@ -15,15 +15,11 @@ import {
 } from 'typeorm';
 import { RolNombre } from '../roles/entities/rol.entity';
 import { Usuario } from '../usuarios/entities/usuario.entity';
-import { AsignarSuscripcionDto } from './dto/asignar-suscripcion.dto';
 import { CreatePlanDto, UpdatePlanDto } from './dto/plan.dto';
 import { Consumo } from './entities/consumo.entity';
 import { EstadoPago, Pago } from './entities/pago.entity';
 import { Plan } from './entities/plan.entity';
-import {
-  EstadoSuscripcion,
-  Suscripcion,
-} from './entities/suscripcion.entity';
+import { EstadoSuscripcion, Suscripcion } from './entities/suscripcion.entity';
 
 export type RecursoSuscripcion = 'busqueda' | 'agente';
 
@@ -74,7 +70,6 @@ export class SuscripcionesService {
         estado: EstadoSuscripcion.ACTIVA,
         inicio: new Date(),
         fin: null,
-        asignadaPor: null,
       }),
     );
   }
@@ -113,9 +108,9 @@ export class SuscripcionesService {
   }
 
   listarPlanes() {
-    return this.planes.find({ order: { nombre: 'ASC' } }).then((planes) =>
-      planes.map((plan) => this.planPublico(plan)),
-    );
+    return this.planes
+      .find({ order: { nombre: 'ASC' } })
+      .then((planes) => planes.map((plan) => this.planPublico(plan)));
   }
 
   async crearPlan(dto: CreatePlanDto) {
@@ -179,7 +174,6 @@ export class SuscripcionesService {
           estado: EstadoSuscripcion.ACTIVA,
           inicio,
           fin,
-          asignadaPor: null,
         }),
       );
       await manager.save(
@@ -207,33 +201,6 @@ export class SuscripcionesService {
     return this.resumen(usuarioId);
   }
 
-  async asignar(adminId: string, usuarioId: string, dto: AsignarSuscripcionDto) {
-    await this.exigirCiudadano(usuarioId);
-    const plan = await this.planes.findOneBy({ id: dto.planId });
-    if (!plan?.activo) {
-      throw new BadRequestException('Selecciona un plan activo.');
-    }
-    const fin = this.fechaFin(dto.fin);
-    await this.dataSource.transaction(async (manager) => {
-      await manager.update(
-        Suscripcion,
-        { usuarioId, estado: EstadoSuscripcion.ACTIVA },
-        { estado: EstadoSuscripcion.CANCELADA },
-      );
-      await manager.save(
-        manager.create(Suscripcion, {
-          usuarioId,
-          planId: plan.id,
-          estado: EstadoSuscripcion.ACTIVA,
-          inicio: new Date(),
-          fin,
-          asignadaPor: adminId,
-        }),
-      );
-    });
-    return this.resumen(usuarioId);
-  }
-
   private async exigirCupo(
     manager: EntityManager,
     usuarioId: string,
@@ -245,18 +212,22 @@ export class SuscripcionesService {
       ...(registrar ? { lock: { mode: 'pessimistic_write' as const } } : {}),
     });
     if (!suscripcion) {
-      throw new ForbiddenException('Tu cuenta no tiene una suscripción activa.');
+      throw new ForbiddenException(
+        'Tu cuenta no tiene una suscripción activa.',
+      );
     }
     if (suscripcion.fin && new Date(suscripcion.fin).getTime() <= Date.now()) {
       suscripcion.estado = EstadoSuscripcion.VENCIDA;
       await manager.save(suscripcion);
       throw new ForbiddenException(
-        'Tu suscripción venció. Un administrador puede renovarla.',
+        'Tu suscripción venció. Elige un plan para renovarla.',
       );
     }
     const plan = await manager.findOneBy(Plan, { id: suscripcion.planId });
     if (!plan) {
-      throw new ForbiddenException('Tu cuenta no tiene una suscripción activa.');
+      throw new ForbiddenException(
+        'Tu cuenta no tiene una suscripción activa.',
+      );
     }
     const limite =
       recurso === 'busqueda' ? plan.busquedasFotoMes : plan.mensajesAgenteMes;
@@ -324,21 +295,10 @@ export class SuscripcionesService {
       relations: { rol: true },
     });
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
-    if (usuario.rol.nombre !== RolNombre.CIUDADANO) {
+    if (usuario.rol.nombre !== String(RolNombre.CIUDADANO)) {
       throw new BadRequestException('Solo los ciudadanos tienen suscripción.');
     }
     return usuario;
-  }
-
-  private fechaFin(value?: string | null) {
-    if (!value) return null;
-    const fin = new Date(value);
-    if (Number.isNaN(fin.getTime()) || fin.getTime() <= Date.now()) {
-      throw new BadRequestException(
-        'La fecha de vencimiento debe ser posterior a este momento.',
-      );
-    }
-    return fin;
   }
 
   private async guardarPlan(plan: Plan) {

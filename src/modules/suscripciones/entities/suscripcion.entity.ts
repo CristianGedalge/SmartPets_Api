@@ -44,9 +44,6 @@ export class Suscripcion {
   @Column({ type: 'timestamptz', nullable: true })
   fin: Date | null;
 
-  @Column({ name: 'asignada_por', type: 'uuid', nullable: true })
-  asignadaPor: string | null;
-
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
